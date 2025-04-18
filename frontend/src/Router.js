@@ -1,21 +1,19 @@
 import React from "react";
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import CustomersPage from "./pages/CustomersPage";
 import AccountsPage from "./pages/AccountsPage";
-import TransactionsPage from ".pages/TransactionsPage";
+import TransactionsPage from "./pages/TransactionsPage";
 
-function AppRouter(){
-    return (
-        <Router>
-            <Routes>
-                <Route path = "/" elment = {<Dashboard />} />
-                <Route path = "/customers" element = {<CustomersPage/>} />
-                <Route path = "/transactions" element = {<TransactionsPage/>} />
-                <Route path = "/accounts" element = {<AccountsPage/>} />
-            </Routes>
-        </Router>
-    );
-}
+const AppRouter = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/customers" element={<CustomersPage />} />
+      <Route path="/accounts" element={<AccountsPage />} />
+      <Route path="/transactions" element={<TransactionsPage />} />
+    </Routes>
+  );
+};
 
 export default AppRouter;

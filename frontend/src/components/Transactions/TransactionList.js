@@ -1,12 +1,12 @@
 import React, { useEffect, useState} from "react";
-import {getTransaction} from "../../services/api";
+import {getTransactions} from "../../services/api";
 
 const TransactionList= () => {
     const [transactions, setTransactions] = useState([]);
 
     useEffect(() => {
-        getTransaction()
-            .then((response) => getTransaction(response.data))
+        getTransactions()
+            .then((response) => getTransactions(response.data))
             .catch((error) => console.log("error fetching the transactions :", error));
     }, []);
 
