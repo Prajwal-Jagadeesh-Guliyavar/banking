@@ -1,7 +1,8 @@
-
 class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:////home/prajwal/crazy_SHIT/banking/banking-system/backend/banking.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     SQLALCHEMY_ECHO = True
-    JWT_SECRET_KEY = 'your-super-secret-key'
+    JWT_SECRET_KEY = 'your-super-secret-key' 
+    JWT_ACCESS_TOKEN_EXPIRES = 1200
+    PROPAGATE_EXCEPTIONS = True
