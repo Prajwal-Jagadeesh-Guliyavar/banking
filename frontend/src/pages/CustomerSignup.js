@@ -1,23 +1,46 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { customerSignup } from '../services/api';
 import './loginStyles.css';
 
 const CustomerSignup = () => {
-  const [fname, setFname] = useState('');
-  const [lname, setLname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    fname: '',
+    lname: '',
+    email: '',
+    phone_no: '',
+    password: ''
+  });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
     try {
-      await customerSignup({ fname, lname, email, password });
+      await customerSignup(formData);
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data.message || 'Signup failed');
+      const errorMessage = err.response?.data?.msg || 'Signup failed';
+      const missingFields = err.response?.data?.missing || [];
+      
+      if (missingFields.length > 0) {
+        setError(`Missing fields: ${missingFields.join(', ')}`);
+      } else {
+        setError(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -26,47 +49,78 @@ const CustomerSignup = () => {
       <i style={{ "--clr": "#00ff0a" }}></i>
       <i style={{ "--clr": "#ff0057" }}></i>
       <i style={{ "--clr": "#fffd44" }}></i>
+      
       <div className="login">
         <h2>Customer Signup</h2>
-        {error && <p className="error">{error}</p>}
+        {error && <div className="error-message" style={{ color: '#ff0057', textAlign: 'center' }}>{error}</div>}
+        
         <form onSubmit={handleSubmit}>
           <div className="inputBx">
-            <input 
-              type="text" 
-              placeholder="First Name" 
-              value={fname}
-              onChange={e => setFname(e.target.value)}
-              required />
+            <input
+              type="text"
+              name="fname"
+              placeholder="First Name"
+              value={formData.fname}
+              onChange={handleChange}
+              required
+            />
           </div>
+          
           <div className="inputBx">
-            <input 
-              type="text" 
-              placeholder="Last Name" 
-              value={lname}
-              onChange={e => setLname(e.target.value)}
-              required />
+            <input
+              type="text"
+              name="lname"
+              placeholder="Last Name"
+              value={formData.lname}
+              onChange={handleChange}
+              required
+            />
           </div>
+          
           <div className="inputBx">
-            <input 
-              type="email" 
-              placeholder="Email" 
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </div>
+          
           <div className="inputBx">
-            <input 
-              type="password" 
+            <input
+              type="tel"
+              name="phone_no"
+              placeholder="Phone Number"
+              value={formData.phone_no}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="inputBx">
+            <input
+              type="password"
+              name="password"
               placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required />
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength="6"
+            />
           </div>
+          
           <div className="inputBx">
-            <input type="submit" value="Sign up" />
+            <input 
+              type="submit" 
+              value={isLoading ? 'Creating Account...' : 'Sign Up'} 
+              disabled={isLoading}
+            />
           </div>
+          
           <div className="links">
-            <Link to="/login">Login</Link>
+            <Link to="/login">Already have an account? Login</Link>
           </div>
         </form>
       </div>

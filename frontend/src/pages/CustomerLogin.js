@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { customerLogin } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
 import './loginStyles.css';
 
 const CustomerLogin = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
     try {
-      const response = await customerLogin({ email, password });
-      localStorage.setItem('token', response.data.access_token);
+      await login({ email, password });
       navigate('/');
     } catch (err) {
-      setError(err.response?.data.message || 'Login failed');
+      setError(err.response?.data?.msg || 'Invalid credentials');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -25,31 +31,43 @@ const CustomerLogin = () => {
       <i style={{ "--clr": "#00ff0a" }}></i>
       <i style={{ "--clr": "#ff0057" }}></i>
       <i style={{ "--clr": "#fffd44" }}></i>
+      
       <div className="login">
         <h2>Customer Login</h2>
-        {error && <p className="error">{error}</p>}
+        {error && <div className="error-message" style={{ color: '#ff0057', textAlign: 'center' }}>{error}</div>}
+        
         <form onSubmit={handleSubmit}>
           <div className="inputBx">
             <input 
               type="email" 
-              placeholder="Email" 
+              placeholder="Email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              required />
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
+          
           <div className="inputBx">
             <input 
               type="password" 
-              placeholder="Password" 
+              placeholder="Password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              required />
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
+          
           <div className="inputBx">
-            <input type="submit" value="Sign in" />
+            <input 
+              type="submit" 
+              value={isLoading ? 'Logging in...' : 'Sign In'} 
+              disabled={isLoading}
+            />
           </div>
+          
           <div className="links">
-            <Link to="/signup">Signup</Link>
+            <Link to="/signup">Sign Up</Link>
+            <Link to="/forgot-password">Forgot Password</Link>
           </div>
         </form>
       </div>

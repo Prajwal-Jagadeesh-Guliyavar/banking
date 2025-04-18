@@ -1,22 +1,14 @@
 import React from 'react';
+import './Footer.css';  // Create this file
 
 const Footer = () => {
   return (
-    <footer style={footerStyle}>
-      Banking System
+    <footer className="footer">
+      <div className="footer-content">
+        Banking Management System © 2024
+      </div>
     </footer>
   );
-};
-
-const footerStyle = {
-  textAlign: 'center',
-  padding: '15px 0',
-  backgroundColor: 'rgba(51, 51, 51, 0.28)',
-  color: '#fff',
-  fontSize: '16px',
-  position: 'fixed',
-  width: '50%',
-  bottom: 0,
 };
 
 export default Footer;
