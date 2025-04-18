@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.models import Account, db
 
-bp =Blueprint('transaction', __name__)
+bp =Blueprint('account', __name__)
 
 @bp.route('/', methods = ['GET'])
 def get_accounts():
