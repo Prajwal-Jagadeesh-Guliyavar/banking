@@ -1,6 +1,7 @@
 # app/routes/auth_routes.py
 from flask import Blueprint, request, jsonify
-from app.models import Customer, Administrator, db
+from app.models import Customer, Administrator
+from app.db import db
 from flask_jwt_extended import create_access_token
 import datetime
 

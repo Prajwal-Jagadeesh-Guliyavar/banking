@@ -1,4 +1,5 @@
-from app import create_app, db
+from app import create_app
+from app.db import db
 from app.models import Account, Customer, Transaction, Loan, Bank, Branch, Employee, Administrator
 app = create_app()
 

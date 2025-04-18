@@ -1,5 +1,5 @@
 from datetime import datetime
-from . import db
+from app.db import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class Customer(db.Model):
