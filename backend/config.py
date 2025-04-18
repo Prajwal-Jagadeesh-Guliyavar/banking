@@ -4,3 +4,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
     SQLALCHEMY_ECHO = True
+    JWT_SECRET_KEY = 'your-super-secret-key'
