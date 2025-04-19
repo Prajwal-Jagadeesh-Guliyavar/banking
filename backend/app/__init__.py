@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, jsonify
+import traceback
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -18,6 +19,14 @@ def create_app():
     migrate.init_app(app, db)
     CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
     jwt.init_app(app)
+
+    @app.errorhandler(500)
+    def handle_500_error(e):
+        return jsonify({
+            "msg": "Internal server error",
+            "error": str(e),
+            "stack": traceback.format_exc()
+        }), 500
 
     from .routes import customer_routes, account_routes, transaction_routes
     app.register_blueprint(customer_routes.bp, url_prefix='/api/customers')

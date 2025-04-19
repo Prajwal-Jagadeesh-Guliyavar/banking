@@ -18,31 +18,38 @@ def login():
     if not email or not password:
         return jsonify({"msg": "Missing email or password"}), 400
 
-    if user_type == 'customer':
-        user = Customer.query.filter_by(email=email).first()
-    elif user_type == 'admin':
-        user = Administrator.query.filter_by(email=email).first()
-    else:
-        return jsonify({"msg": "Invalid user type"}), 400
+    try:
+        if user_type == 'customer':
+            user = Customer.query.filter_by(email=email).first()
+        elif user_type == 'admin':
+            user = Administrator.query.filter_by(email=email).first()
+        else:
+            return jsonify({"msg": "Invalid user type"}), 400
 
-    if not user or not check_password_hash(user.password, password):
-        return jsonify({"msg": "Invalid credentials"}), 401
+        if not user:
+            return jsonify({"msg": "User not found"}), 404
 
-    access_token = create_access_token(identity={
-        'id': user.id,
-        'type': user_type,
-        'email': user.email
-    })
-    
-    return jsonify({
-        "access_token": access_token,
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "name": f"{user.fname} {user.lname}" if user_type == 'customer' else user.username,
-            "type": user_type
-        }
-    }), 200
+        if not check_password_hash(user.password, password):
+            return jsonify({"msg": "Invalid password"}), 401
+
+        access_token = create_access_token(identity={
+            'id': user.id,
+            'type': user_type,
+            'email': user.email
+        })
+        
+        return jsonify({
+            "access_token": access_token,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": f"{user.fname} {user.lname}" if user_type == 'customer' else user.username,
+                "type": user_type
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({"msg": "Login failed", "error": str(e)}), 500
 
 @bp.route('/customer/signup', methods=['POST'])
 def customer_signup():
@@ -67,7 +74,7 @@ def customer_signup():
             email=data['email'],
             phone_no=data['phone_no'],
             password=generate_password_hash(data['password']),
-            created_at=datetime.utcnow()
+            #created_at=datetime.now()
         )
         
         db.session.add(new_customer)

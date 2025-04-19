@@ -7,12 +7,12 @@ class Customer(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     fname = db.Column(db.String(50), nullable=False)
-    minit = db.Column(db.String(1))
     lname = db.Column(db.String(50), nullable=False)
     address = db.Column(db.String(100))
     phone_no = db.Column(db.String(15))
     email = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -31,6 +31,8 @@ class Administrator(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    phone_no = db.Column(db.String(15))
+    created_at = db.Column(db.DateTime, default=datetime.now)
     
     def set_password(self, password):
         self.password = generate_password_hash(password)
