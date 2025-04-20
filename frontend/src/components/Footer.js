@@ -1,13 +1,11 @@
 import React from 'react';
-import './Footer.css';  // Create this file
+import './Footer.css';
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <div className="footer-content">
-        Banking Management System © 2024
-      </div>
-    </footer>
+    <div className="footer-container">
+      Banking Management System © {new Date().getFullYear()}
+    </div>
   );
 };
 
