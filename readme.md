@@ -10,11 +10,12 @@ A full-stack banking application with Flask backend and React frontend.
 - Account overview
 
 ## Project Structure
-├── banking-system/
-│ ├── backend/ # Flask API (Python)
-│ └── frontend/ # React Application
-├── .gitignore
-└── README.md
+banking-system/
+- backend/       # Flask API (Python)
+- frontend/      # React Application
+- .gitignore
+- README.md
+
 
 
 ## Installation
