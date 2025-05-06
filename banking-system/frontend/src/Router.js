@@ -5,15 +5,12 @@ import { useAuth } from './context/authContext';
 // Public Components
 import CustomerLogin from './pages/CustomerLogin';
 import CustomerSignup from './pages/CustomerSignup';
-import AdminLogin from './pages/AdminLogin';
-import AdminSignup from './pages/AdminSignup';
 
 // Protected Components
 import Dashboard from './pages/Dashboard';
-import CustomersPage from './pages/CustomersPage';
-import AccountsPage from './pages/AccountsPage';
+import CustomersPage from './pages/Profile';
+import AccountsPage from './pages/Loan';
 import TransactionsPage from './pages/TransactionsPage';
-import AdminDashboard from './pages/AdminDashboard';
 
 // Common Components
 import NotFound from './pages/NotFound';
@@ -26,10 +23,10 @@ const AuthRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) return <LoadingSpinner />;
-  
-  // If user is logged in, redirect to appropriate dashboard
+
+  // If user is logged in, redirect to dashboard
   if (user) {
-    return <Navigate to={user.type === 'admin' ? '/admin/dashboard' : '/'} replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -37,18 +34,13 @@ const AuthRoute = ({ children }) => {
 
 /**
  * ProtectedRoute - Requires authentication
- * If adminOnly is true, only allows admin users
  */
-const ProtectedRoute = ({ adminOnly = false, children }) => {
+const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) return <LoadingSpinner />;
-  
+
   if (!user) return <Navigate to="/login" replace />;
-  
-  if (adminOnly && user.type !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
 
   return children ?? <Outlet />;
 };
@@ -57,81 +49,55 @@ const AppRouter = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
           <AuthRoute>
             <CustomerLogin />
           </AuthRoute>
-        } 
+        }
       />
-      <Route 
-        path="/signup" 
+      <Route
+        path="/signup"
         element={
           <AuthRoute>
             <CustomerSignup />
           </AuthRoute>
-        } 
-      />
-      <Route 
-        path="/admin/login" 
-        element={
-          <AuthRoute>
-            <AdminLogin />
-          </AuthRoute>
-        } 
-      />
-      <Route 
-        path="/admin/signup" 
-        element={
-          <AuthRoute>
-            <AdminSignup />
-          </AuthRoute>
-        } 
+        }
       />
 
-      {/* Customer Protected Routes */}
-      <Route 
-        path="/" 
+      {/* Protected Routes */}
+      <Route
+        path="/"
         element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/customers" 
+      <Route
+        path="/customers"
         element={
           <ProtectedRoute>
             <CustomersPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/accounts" 
+      <Route
+        path="/accounts"
         element={
           <ProtectedRoute>
             <AccountsPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/transactions" 
+      <Route
+        path="/transactions"
         element={
           <ProtectedRoute>
             <TransactionsPage />
           </ProtectedRoute>
-        } 
-      />
-
-      {/* Admin Protected Routes */}
-      <Route 
-        path="/admin/dashboard" 
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } 
+        }
       />
 
       {/* Fallback / Not Found */}

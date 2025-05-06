@@ -22,12 +22,12 @@ const Navbar = () => {
         <span className="bank-logo">🏦</span>
         <h1 className="bank-title">Premier Banking</h1>
       </div>
-      
+
       {user && (
         <ul className="nav-links">
-          <li><Link to="/" className="nav-link">Dashboard</Link></li>
-          <li><Link to="/customers" className="nav-link">Clients</Link></li>
-          <li><Link to="/accounts" className="nav-link">Accounts</Link></li>
+          <li><Link to="/" className="nav-link">About</Link></li>
+          <li><Link to="/customers" className="nav-link">Profile</Link></li>
+          <li><Link to="/accounts" className="nav-link">Loans</Link></li>
           <li><Link to="/transactions" className="nav-link">Transactions</Link></li>
         </ul>
       )}
@@ -35,9 +35,6 @@ const Navbar = () => {
       <div className="nav-user">
         {user ? (
           <>
-            <span className="user-avatar">
-              {user.name?.[0]?.toUpperCase() || 'U'}
-            </span>
             <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>

@@ -216,6 +216,6 @@ body {
 .main-content {
   flex: 1;
   padding: 20px;
-  margin-top: 120px; /* Navbar height */
+  margin-top: 80px; /* Navbar height */
   margin-bottom: 60px; /* Footer height */
 }

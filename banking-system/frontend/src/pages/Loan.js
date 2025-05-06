@@ -4,7 +4,7 @@ import AccountList from "../components/Accounts/AccountList";
 const AccountsPage = () => {
   return (
     <div>
-      <h1>Accounts</h1>
+      <h1>Loan</h1>
       <AccountList />
     </div>
   );
