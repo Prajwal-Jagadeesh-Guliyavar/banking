@@ -1,57 +1,91 @@
-import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  timeout: 10000,
-  headers: {
+const API_URL = 'http://localhost:5000/api';
+
+// Helper function for making authenticated requests
+const authFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('authToken');
+
+  const headers = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    ...options.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
-});
 
-api.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  error => {
-    return Promise.reject(error);
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({
+      error: `HTTP error! status: ${response.status}`,
+    }));
+    throw new Error(error.error || `HTTP error! status: ${response.status}`);
   }
-);
 
-api.interceptors.response.use(
-  response => {
-    return response;
-  },
-  error => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+  return await response.json();
+};
 
-export const getCustomers = () => api.get('/customers');
-export const createCustomer = (data) => api.post('/customers', data);
+// Auth services
+export const registerUser = async (userData) => {
+  return await authFetch('/register', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  });
+};
 
-export const getAccounts = () => api.get('/accounts');
-export const createAccount = (data) => api.post('/accounts', data);
+export const loginUser = async (credentials) => {
+  return await authFetch('/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  });
+};
 
-export const getTransactions = () => api.get('/transactions');
-export const createTransaction = (data) => api.post('/transactions', data);
+export const getUserProfile = async () => {
+  return await authFetch('/user');
+};
 
-export const customerSignup = (data) => api.post('/auth/customer/signup', data);
-export const customerLogin = (data) => api.post('/auth/login', { ...data, user_type: 'customer' });
-export const adminLogin = (data) => api.post('/auth/login', { ...data, user_type: 'admin' });
-export const adminSignup = (data) => api.post('/auth/admin/signup', data);
+export const updateUserProfile = async (profileData) => {
+  return await authFetch('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  });
+};
 
-export const getCurrentUser = () => api.get('/auth/me');
-export const logout = () => api.post('/auth/logout');
+export const changePassword = async (passwordData) => {
+  return await authFetch('/profile/password', {
+    method: 'PUT',
+    body: JSON.stringify(passwordData),
+  });
+};
 
-export default api;
+// Transaction services
+export const getTransactions = async () => {
+  return await authFetch('/transactions');
+};
+
+export const createTransaction = async (transactionData) => {
+  return await authFetch('/transactions', {
+    method: 'POST',
+    body: JSON.stringify(transactionData),
+  });
+};
+
+// Loan services
+export const getLoans = async () => {
+  return await authFetch('/loans');
+};
+
+export const getLoanApplications = async () => {
+  return await authFetch('/loan/applications');
+};
+
+export const applyForLoan = async (loanData) => {
+  return await authFetch('/loan/apply', {
+    method: 'POST',
+    body: JSON.stringify(loanData),
+  });
+};
