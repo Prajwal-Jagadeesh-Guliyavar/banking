@@ -1,11 +1,12 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  PiggyBank, ArrowUpRight, ArrowDownRight, CreditCard,
-  BarChart4, ArrowRight, Wallet, TrendingUp, Clock,
+import { 
+  PiggyBank, ArrowUpRight, ArrowDownRight, CreditCard, 
+  BarChart4, ArrowRight, Wallet, TrendingUp, Clock, 
   DollarSign, Plus, Calendar
 } from "lucide-react";
 import { toast } from "sonner";
@@ -41,13 +42,13 @@ const DashboardPage = () => {
     const result = [];
     for (let i = 0; i < 5; i++) {
       const type = transactionTypes[Math.floor(Math.random() * transactionTypes.length)];
-      const amount = type === "deposit" ?
-        getRandomAmount(50, 2000) :
+      const amount = type === "deposit" ? 
+        getRandomAmount(50, 2000) : 
         -getRandomAmount(10, 500);
-
+      
       const date = new Date(today);
       date.setDate(today.getDate() - i);
-
+      
       result.push({
         id: `t-${i}`,
         type,
@@ -63,63 +64,63 @@ const DashboardPage = () => {
   const generateMockBalanceHistory = () => {
     const today = new Date();
     const result = [];
-    let balance = 5000;
-
+    let balance = 5000; // Starting balance
+    
     for (let i = 30; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
-
+      
       // Random daily fluctuation between -200 and +300
       const fluctuation = Math.random() * 500 - 200;
       balance += fluctuation;
-      balance = Math.max(balance, 1000); //minmum balancce
-
+      balance = Math.max(balance, 1000); // Ensure balance doesn't go too low
+      
       result.push({
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         balance: Math.round(balance * 100) / 100
       });
     }
-
+    
     return result;
   };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // fetching from localStorage first
+        // Try to get user data from localStorage first
         const storedUser = localStorage.getItem("user");
-
+        
         if (storedUser) {
           setUserData(JSON.parse(storedUser));
           setLoading(false);
           return;
         }
-
+        
         // If not in localStorage, fetch from API
         const token = localStorage.getItem("authToken");
-
+        
         if (!token) {
           throw new Error("Authentication token not found");
         }
-
+        
         const response = await fetch("http://localhost:5000/api/user", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
+        
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }
-
+        
         const data = await response.json();
         setUserData(data);
         localStorage.setItem("user", JSON.stringify(data));
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast.error("Failed to load user data");
-
-        // dummy data
+        
+        // For demo purposes, create mock user data
         const mockUser = {
           name: "Demo User",
           email: "demo@example.com",
@@ -178,14 +179,14 @@ const DashboardPage = () => {
             </div>
             <div className="mt-4 md:mt-0">
               <Button className="bg-white text-bank-primary hover:bg-gray-100">
-                <Plus size={16} className="mr-2" />
+                <Plus size={16} className="mr-2" /> 
                 Quick Actions
               </Button>
             </div>
           </div>
         </div>
       </div>
-
+      
       <div className="container mx-auto px-4 -mt-6">
         {/* Account Balance Card */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -203,7 +204,7 @@ const DashboardPage = () => {
                   <h2 className="text-3xl font-bold">{formatCurrency(userData?.balance || 0)}</h2>
                   <p className="text-xs text-gray-500 mt-1">Account Number: {userData?.accountNumber || "XXXX-XXXX-XXXX"}</p>
                 </div>
-
+                
                 <div className="h-[200px] md:h-[240px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
@@ -217,35 +218,35 @@ const DashboardPage = () => {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 12 }}
+                      <XAxis 
+                        dataKey="date" 
+                        tick={{ fontSize: 12 }} 
                         tickLine={false}
-                        axisLine={{ stroke: '#f0f0f0' }}
+                        axisLine={{ stroke: '#f0f0f0' }} 
                       />
-                      <YAxis
+                      <YAxis 
                         tickFormatter={(value) => `$${value}`}
                         tick={{ fontSize: 12 }}
                         tickLine={false}
                         axisLine={false}
                         domain={['dataMin - 500', 'dataMax + 500']}
                       />
-                      <Tooltip
+                      <Tooltip 
                         formatter={(value) => [`$${value.toFixed(2)}`, 'Balance']}
                         labelFormatter={(value) => `Date: ${value}`}
-                        contentStyle={{
+                        contentStyle={{ 
                           backgroundColor: 'white',
                           border: '1px solid #f0f0f0',
                           borderRadius: '0.375rem',
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                         }}
                       />
-                      <Area
-                        type="monotone"
-                        dataKey="balance"
-                        stroke="#1F6BCC"
-                        fillOpacity={1}
-                        fill="url(#colorBalance)"
+                      <Area 
+                        type="monotone" 
+                        dataKey="balance" 
+                        stroke="#1F6BCC" 
+                        fillOpacity={1} 
+                        fill="url(#colorBalance)" 
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -253,7 +254,7 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-
+          
           <div className="space-y-6">
             <Card className="shadow-md">
               <CardHeader className="pb-2">
@@ -284,7 +285,7 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="shadow-md">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-medium">Upcoming Payments</CardTitle>
@@ -327,7 +328,7 @@ const DashboardPage = () => {
             </Card>
           </div>
         </div>
-
+        
         {/* Recent Transactions */}
         <div className="mt-6">
           <Card className="shadow-md">
@@ -372,7 +373,7 @@ const DashboardPage = () => {
             </CardContent>
           </Card>
         </div>
-
+        
         {/* Financial Overview */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="shadow-md">
@@ -419,7 +420,7 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-
+          
           <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium">Active Loans</CardTitle>
@@ -452,7 +453,7 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-
+          
           <Card className="shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium">Savings Goals</CardTitle>
@@ -469,7 +470,7 @@ const DashboardPage = () => {
                   </div>
                   <p className="text-xs text-gray-500 mt-2">42% completed</p>
                 </div>
-
+                
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <p className="font-medium">Emergency Fund</p>
@@ -480,7 +481,7 @@ const DashboardPage = () => {
                   </div>
                   <p className="text-xs text-gray-500 mt-2">50% completed</p>
                 </div>
-
+                
                 <Button variant="outline" className="w-full">Create new goal</Button>
               </div>
             </CardContent>

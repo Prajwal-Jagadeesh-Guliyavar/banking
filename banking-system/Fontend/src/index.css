@@ -89,7 +89,7 @@
   .banking-card {
     @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
   }
-
+  
   .section-heading {
     @apply text-2xl font-semibold text-bank-primary mb-4;
   }

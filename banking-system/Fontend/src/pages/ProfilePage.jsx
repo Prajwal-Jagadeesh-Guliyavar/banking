@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,7 +38,9 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        // Try to get user data from localStorage first
         const storedUser = localStorage.getItem("user");
+
         if (storedUser) {
           const user = JSON.parse(storedUser);
           const mockUserData = {
@@ -49,6 +52,7 @@ const ProfilePage = () => {
             accountType: user.accountType || "Savings",
             joinDate: user.joined || "January 2023",
           };
+
           setUserData(mockUserData);
           setFormData({
             name: mockUserData.name,
@@ -63,13 +67,36 @@ const ProfilePage = () => {
           return;
         }
 
-        const token = localStorage.getItem("authToken");
-        const response = await fetch("http://localhost:5000/api/profile", {
-          headers: { Authorization: `Bearer ${token}` },
+        // In a real application, would fetch from backend
+        // const token = localStorage.getItem("authToken");
+        // const response = await fetch("http://localhost:5000/api/profile", {
+        //   headers: { Authorization: `Bearer ${token}` },
+        // });
+        // const data = await response.json();
+        // setUserData(data);
+        // setFormData({ ...data, currentPassword: "", newPassword: "", confirmPassword: "" });
+
+        // For demo purposes, use mock data
+        const mockUserData = {
+          name: "Demo User",
+          email: "demo@example.com",
+          phone: "+1 (555) 123-4567",
+          address: "123 Main St, Anytown, USA",
+          accountNumber: "1234567890",
+          accountType: "Savings",
+          joinDate: "January 2023",
+        };
+
+        setUserData(mockUserData);
+        setFormData({
+          name: mockUserData.name,
+          email: mockUserData.email,
+          phone: mockUserData.phone,
+          address: mockUserData.address,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
         });
-        const data = await response.json();
-        setUserData(data);
-        setFormData({ ...data, currentPassword: "", newPassword: "", confirmPassword: "" });
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -88,62 +115,41 @@ const ProfilePage = () => {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-
-    // Validation checks
-    if (!formData.name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
-
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
-    if (!formData.phone.trim()) {
-      toast.error("Phone number is required");
-      return;
-    }
-
-    const cleanedPhone = formData.phone.replace(/\D/g, '');
-    if (!/^\+?[1-9]\d{1,14}$/.test(cleanedPhone)) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
-
-    if (!formData.address.trim()) {
-      toast.error("Address is required");
-      return;
-    }
-
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:5000/api/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: cleanedPhone,
-          address: formData.address,
-        }),
-      });
+      // In a real application, would send to backend
+      // const token = localStorage.getItem("authToken");
+      // const response = await fetch("http://localhost:5000/api/profile", {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({
+      //     name: formData.name,
+      //     email: formData.email,
+      //     phone: formData.phone,
+      //     address: formData.address,
+      //   }),
+      // });
+      // const data = await response.json();
 
-      const data = await response.json();
+      // For demo purposes, simulate API request
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (!response.ok) {
-        toast.error(data.message || "Failed to update profile");
-        return;
-      }
+      // Update user data
+      const updatedUserData = {
+        ...userData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+      };
 
-      const updatedUserData = { ...userData, ...formData };
       setUserData(updatedUserData);
 
+      // Update localStorage
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
@@ -155,11 +161,7 @@ const ProfilePage = () => {
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
-      if (error.name === 'TypeError') {
-        toast.error("Network error - please check your connection");
-      } else {
-        toast.error("Failed to update profile");
-      }
+      toast.error("Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -186,25 +188,23 @@ const ProfilePage = () => {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:5000/api/profile/password", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        }),
-      });
+      // In a real application, would send to backend
+      // const token = localStorage.getItem("authToken");
+      // const response = await fetch("http://localhost:5000/api/profile/password", {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({
+      //     currentPassword: formData.currentPassword,
+      //     newPassword: formData.newPassword,
+      //   }),
+      // });
+      // const data = await response.json();
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || "Failed to update password");
-        return;
-      }
+      // For demo purposes, simulate API request
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       setFormData({
         ...formData,
@@ -216,11 +216,7 @@ const ProfilePage = () => {
       toast.success("Password updated successfully");
     } catch (error) {
       console.error("Error updating password:", error);
-      if (error.name === 'TypeError') {
-        toast.error("Network error - please check your connection");
-      } else {
-        toast.error("Failed to update password");
-      }
+      toast.error("Failed to update password");
     } finally {
       setSaving(false);
     }
@@ -239,6 +235,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-bank-light pb-12">
+      {/* Page Header */}
       <div className="bg-gradient-to-r from-bank-primary to-bank-secondary py-8 px-4">
         <div className="container mx-auto">
           <h1 className="text-white text-2xl md:text-3xl font-bold">Account Profile</h1>
@@ -248,6 +245,7 @@ const ProfilePage = () => {
 
       <div className="container mx-auto px-4 -mt-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Profile Summary Card */}
           <Card className="shadow-lg lg:col-span-1">
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center">
@@ -306,6 +304,7 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
 
+          {/* Edit Profile Card */}
           <Card className="shadow-md lg:col-span-2">
             <CardHeader>
               <CardTitle>Edit Profile</CardTitle>
@@ -328,7 +327,6 @@ const ProfilePage = () => {
                             <Input
                               id="name"
                               name="name"
-                              required
                               value={formData.name}
                               onChange={handleChange}
                               className="pl-10"
@@ -345,7 +343,6 @@ const ProfilePage = () => {
                               id="email"
                               name="email"
                               type="email"
-                              required
                               value={formData.email}
                               onChange={handleChange}
                               className="pl-10"
@@ -361,16 +358,8 @@ const ProfilePage = () => {
                             <Input
                               id="phone"
                               name="phone"
-                              required
                               value={formData.phone}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                const formatted = value
-                                  .replace(/\D/g, '')
-                                  .replace(/(\d{1})(\d{3})(\d{3})(\d{4})/, '+$1 ($2) $3-$4')
-                                  .slice(0, 16);
-                                setFormData({ ...formData, phone: formatted });
-                              }}
+                              onChange={handleChange}
                               className="pl-10"
                               placeholder="+1 (555) 123-4567"
                             />
@@ -384,7 +373,6 @@ const ProfilePage = () => {
                             <Input
                               id="address"
                               name="address"
-                              required
                               value={formData.address}
                               onChange={handleChange}
                               className="pl-10"

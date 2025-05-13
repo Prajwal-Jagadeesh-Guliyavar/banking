@@ -1,31 +1,32 @@
-import { use, useState } from "react";
+
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
-
-const LoginPage = ({setIsAuthenticated}) => {
-  const [formData,setFormData] = useState({
-    email : "",
-    password : "",
+const LoginPage = ({ setIsAuthenticated }) => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigatel();
+  const navigate = useNavigate();
 
-  const handleChange = (e) =>{
-    const {name, value} = e.target;
-    setFormData({...formData, [name]:value});
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if(!formData.email || !fromData.password){
-      toast.error("Please fill in all the fields");
+    // Validate form
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill in all fields");
       setLoading(false);
       return;
     }
@@ -53,12 +54,11 @@ const LoginPage = ({setIsAuthenticated}) => {
       setIsAuthenticated(true);
       toast.success("Login successful!");
       navigate("/dashboard");
-    }
-    catch(error){
+    } catch (error) {
       console.error("Login error:", error);
       toast.error(error.message || "Login failed. Please try again.");
 
-      //dummy data simulation
+      // For demo purposes, simulate successful login when backend is not available
       if (!window.location.hostname.includes("localhost")) {
         simulateDemoLogin();
       }
@@ -67,7 +67,7 @@ const LoginPage = ({setIsAuthenticated}) => {
     }
   };
 
-  // for testing
+  // Function to simulate login for demo purposes when backend is not available
   const simulateDemoLogin = () => {
     const demoUser = {
       id: "demo-user-123",

@@ -4,28 +4,28 @@ const API_URL = 'http://localhost:5000/api';
 // Helper function for making authenticated requests
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem('authToken');
-
+  
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
   };
-
+  
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-
+  
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
   });
-
+  
   if (!response.ok) {
     const error = await response.json().catch(() => ({
       error: `HTTP error! status: ${response.status}`,
     }));
     throw new Error(error.error || `HTTP error! status: ${response.status}`);
   }
-
+  
   return await response.json();
 };
 

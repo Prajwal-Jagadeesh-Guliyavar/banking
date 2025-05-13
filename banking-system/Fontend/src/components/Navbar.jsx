@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { useLocation, Link } from "react-router";
-import { Button } from "@/components/ui/button";
+
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import {
   Menu, X, Home, User, CreditCard,
   PiggyBank, FileText, LogOut, LogIn
 } from 'lucide-react';
 
 const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
-  const [ mobileMenuOpen, setMobileMenuOpen ] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const toggleMobileMenu = () => {
@@ -26,20 +27,20 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
   };
 
   const navItems = [
-    { name : 'Home', path : '/', icon : <Home size ={18} />},
+    { name: 'Home', path: '/', icon: <Home size={18} /> },
     ...(isAuthenticated ? [
       { name: 'Dashboard', path: '/dashboard', icon: <CreditCard size={18} /> },
       { name: 'Transactions', path: '/transactions', icon: <FileText size={18} /> },
       { name: 'Apply for Loan', path: '/loan', icon: <PiggyBank size={18} /> },
       { name: 'Profile', path: '/profile', icon: <User size={18} /> },
-    ] : [] ),
+    ] : []),
   ];
 
   const isActive = (path) => {
     return location.pathname === path ? 'bg-bank-accent text-white' : 'text-gray-700 hover:bg-bank-light';
   };
 
-  return(
+  return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -48,7 +49,7 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
               <div className="h-8 w-8 bg-bank-primary rounded-md flex items-center justify-center">
                 <PiggyBank size={20} className="text-white" />
               </div>
-              <span className="text-xl font-bold text-bank-primary">Bankit</span>
+              <span className="text-xl font-bold text-bank-primary">BankIt</span>
             </Link>
           </div>
 
@@ -130,5 +131,7 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
         </div>
       )}
     </nav>
-  )
-}
+  );
+};
+
+export default Navbar;

@@ -85,43 +85,44 @@ const TransactionsPage = () => {
   };
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        // Try to get user data from localStorage
-        const storedUser = localStorage.getItem("user");
+  const fetchTransactions = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const [userResponse, transactionsResponse] = await Promise.all([
+        fetch("http://localhost:5000/api/user", { // Changed endpoint to /api/user
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("http://localhost:5000/api/transactions", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        })
+      ]);
 
-        if (storedUser) {
-          const user = JSON.parse(storedUser);
-          setUserData({
-            balance: user.balance || 5000,
-            name: user.name || "Demo User",
-            accountNumber: user.accountNumber || "1234567890",
-          });
-        }
+      if (!userResponse.ok) throw new Error('Failed to fetch user data');
+      if (!transactionsResponse.ok) throw new Error('Failed to fetch transactions');
 
-        // In a real application, would fetch from backend
-        // const token = localStorage.getItem("authToken");
-        // const response = await fetch("http://localhost:5000/api/transactions", {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
-        // const data = await response.json();
-        // setTransactions(data);
+      const userData = await userResponse.json();
+      const transactionsData = await transactionsResponse.json();
 
-        // For demo purposes, generate mock transactions
-        setTimeout(() => {
-          setTransactions(generateMockTransactions());
-          setLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-        toast.error("Failed to load transaction history");
-        setTransactions(generateMockTransactions());
-        setLoading(false);
-      }
-    };
+      setUserData({
+        balance: userData.balance,
+        name: userData.name,
+        accountNumber: userData.accountNumber,
+      });
 
-    fetchTransactions();
-  }, []);
+      setTransactions(transactionsData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error(error.message);
+      setLoading(false);
+    }
+  };
+
+  fetchTransactions();
+}, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -133,75 +134,67 @@ const TransactionsPage = () => {
   };
 
   const handleCreateTransaction = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!newTransaction.amount || !newTransaction.description) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+  if (!newTransaction.amount || !newTransaction.description) {
+    toast.error("Please fill in all fields");
+    return;
+  }
 
-    if (isNaN(newTransaction.amount) || parseFloat(newTransaction.amount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
+  const amount = parseFloat(newTransaction.amount);
+  // if (isNaN(amount) {
+  //   toast.error("Please enter a valid amount");
+  //   return;
+  // }
 
-    try {
-      const amount = newTransaction.type === "withdrawal"
-        ? -Math.abs(parseFloat(newTransaction.amount))
-        : Math.abs(parseFloat(newTransaction.amount));
-
-      // In a real application, would send to backend
-      // const token = localStorage.getItem("authToken");
-      // const response = await fetch("http://localhost:5000/api/transactions", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({
-      //     ...newTransaction,
-      //     amount,
-      //   }),
-      // });
-      // const data = await response.json();
-
-      // For demo purposes, create a mock transaction
-      const newTx = {
-        id: `t-${Date.now()}`,
-        type: newTransaction.type,
-        amount,
-        merchant: newTransaction.description.split(' ')[0],
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = await fetch("http://localhost:5000/api/transactions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        transaction_type: newTransaction.type, // Match server's expected field name
+        amount: newTransaction.type === "withdrawal" ? -amount : amount,
         description: newTransaction.description,
-        date: new Date().toISOString(),
-        status: "completed"
-      };
+        currency: "INR" // Add currency field if required by backend
+      }),
+    });
 
-      setTransactions([newTx, ...transactions]);
+    const data = await response.json();
 
-      // Update user balance
-      const newBalance = userData.balance + amount;
-      setUserData({ ...userData, balance: newBalance });
-
-      // Update localStorage
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        user.balance = newBalance;
-        localStorage.setItem("user", JSON.stringify(user));
-      }
-
-      toast.success(`Transaction created successfully`);
-      setDialogOpen(false);
-      setNewTransaction({
-        type: "deposit",
-        amount: "",
-        description: "",
-      });
-    } catch (error) {
-      console.error("Error creating transaction:", error);
-      toast.error("Failed to create transaction");
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to create transaction");
     }
-  };
+
+    setTransactions([data, ...transactions]);
+
+    // Update balance
+    const newBalance = userData.balance + data.amount;
+    setUserData({ ...userData, balance: newBalance });
+
+    // Update localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      user.balance = newBalance;
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+
+    toast.success("Transaction created successfully");
+    setDialogOpen(false);
+    setNewTransaction({
+      type: "deposit",
+      amount: "",
+      description: "",
+    });
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    toast.error(error.message);
+  }
+};
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -265,10 +258,11 @@ const TransactionsPage = () => {
     });
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -325,10 +319,11 @@ const TransactionsPage = () => {
                           </SelectContent>
                         </Select>
                       </div>
+                      {/* In the DialogContent JSX */}
                       <div className="grid gap-2">
                         <Label htmlFor="amount">Amount</Label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
                           <Input
                             id="amount"
                             name="amount"

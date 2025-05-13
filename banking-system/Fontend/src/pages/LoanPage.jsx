@@ -35,8 +35,8 @@ const LoanPage = () => {
     purpose: "",
   });
   const [loading, setLoading] = useState(false);
-
-  // Dummy data for active loans
+  
+  // Mock data for active loans
   const [activeLoans, setActiveLoans] = useState([
     {
       id: "loan-1",
@@ -51,8 +51,8 @@ const LoanPage = () => {
       status: "active",
     }
   ]);
-
-  // Dummy data for loan applications
+  
+  // Mock data for loan applications
   const [applications, setApplications] = useState([
     {
       id: "app-1",
@@ -75,22 +75,22 @@ const LoanPage = () => {
 
   const handleLoanTypeChange = (value) => {
     setLoanType(value);
-
+    
     // Set default loan amounts based on type
     setLoanAmount(10000);
     setLoanTerm(36);
   };
 
   const calculateMonthlyPayment = () => {
-    //interest rates based on loan type
+    // Calculate interest rates based on loan type
     const rate = 5.25;
-
-    //annual rate to monthly
+    
+    // Convert annual rate to monthly
     const monthlyRate = rate / 100 / 12;
-
-    //monthly payment using formula: P * r * (1 + r)^n / ((1 + r)^n - 1)
+    
+    // Calculate monthly payment using formula: P * r * (1 + r)^n / ((1 + r)^n - 1)
     const payment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm) / (Math.pow(1 + monthlyRate, loanTerm) - 1);
-
+    
     return {
       payment: payment.toFixed(2),
       rate: rate,
@@ -101,25 +101,26 @@ const LoanPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     // Form validation
     if (!loanType || loanAmount <= 0 || loanTerm <= 0) {
       toast.error("Please select a loan type and specify amount and term");
       return;
     }
-
+    
     if (!formData.fullName || !formData.email || !formData.phone || !formData.income || !formData.creditScore) {
       toast.error("Please fill in all required fields");
       return;
     }
-
+    
     setLoading(true);
-
+    
     try {
       // In a real application, would send to backend
       // For demo purposes, simulate API request
       await new Promise(resolve => setTimeout(resolve, 1500));
-
+      
+      // Add new application to list
       const newApplication = {
         id: `app-${Date.now()}`,
         type: "Personal Loan",
@@ -128,10 +129,10 @@ const LoanPage = () => {
         status: "pending",
         term: loanTerm,
       };
-
+      
       setApplications([newApplication, ...applications]);
-
-      // Reset
+      
+      // Reset form
       setLoanType("personal");
       setLoanAmount(10000);
       setLoanTerm(36);
@@ -144,7 +145,7 @@ const LoanPage = () => {
         creditScore: "",
         purpose: "",
       });
-
+      
       toast.success("Loan application submitted successfully!");
       setActiveTab("applications");
     } catch (error) {
@@ -179,14 +180,14 @@ const LoanPage = () => {
 
   return (
     <div className="min-h-screen bg-bank-light pb-12">
-      {/* Header */}
+      {/* Page Header */}
       <div className="bg-gradient-to-r from-bank-primary to-bank-secondary py-8 px-4">
         <div className="container mx-auto">
           <h1 className="text-white text-2xl md:text-3xl font-bold">Loan Center</h1>
           <p className="text-white/80 mt-1">Apply for loans or check your existing loan status</p>
         </div>
       </div>
-
+      
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="apply" value={activeTab} onValueChange={setActiveTab} className="-mt-12 relative z-10">
           <div className="bg-white p-3 rounded-lg shadow-md inline-block">
@@ -196,10 +197,11 @@ const LoanPage = () => {
               <TabsTrigger value="applications">Applications</TabsTrigger>
             </TabsList>
           </div>
-
+          
+          {/* Apply for Loan Tab */}
           <TabsContent value="apply" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Options */}
+              {/* Loan Options */}
               <Card className="shadow-md">
                 <CardHeader>
                   <CardTitle>Choose Loan Type</CardTitle>
@@ -216,7 +218,7 @@ const LoanPage = () => {
                       <span>Personal Loan</span>
                     </Button>
                   </div>
-
+                  
                   {loanType && (
                     <>
                       <div className="mt-8">
@@ -239,7 +241,7 @@ const LoanPage = () => {
                           <span>{formatCurrency(100000)}</span>
                         </div>
                       </div>
-
+                      
                       <div className="mt-6">
                         <Label htmlFor="loan-term" className="text-base flex justify-between">
                           <span>Loan Term</span>
@@ -262,7 +264,7 @@ const LoanPage = () => {
                           <span>10 years</span>
                         </div>
                       </div>
-
+                      
                       <Card className="mt-8 bg-gray-50">
                         <CardHeader className="pb-2">
                           <div className="flex justify-between items-center">
@@ -295,7 +297,7 @@ const LoanPage = () => {
                   )}
                 </CardContent>
               </Card>
-
+              
               {/* Loan Application Form */}
               <Card className="shadow-md lg:col-span-2">
                 <CardHeader>
@@ -316,7 +318,7 @@ const LoanPage = () => {
                             placeholder="John Doe"
                           />
                         </div>
-
+                        
                         <div className="space-y-2">
                           <Label htmlFor="email">Email Address</Label>
                           <Input
@@ -328,7 +330,7 @@ const LoanPage = () => {
                             placeholder="john@example.com"
                           />
                         </div>
-
+                        
                         <div className="space-y-2">
                           <Label htmlFor="phone">Phone Number</Label>
                           <Input
@@ -339,7 +341,7 @@ const LoanPage = () => {
                             placeholder="+1 (555) 123-4567"
                           />
                         </div>
-
+                        
                         <div className="space-y-2">
                           <Label htmlFor="income">Annual Income</Label>
                           <div className="relative">
@@ -354,7 +356,7 @@ const LoanPage = () => {
                             />
                           </div>
                         </div>
-
+                        
                         <div className="space-y-2">
                           <Label htmlFor="employment">Employment Status</Label>
                           <Select
@@ -373,7 +375,7 @@ const LoanPage = () => {
                             </SelectContent>
                           </Select>
                         </div>
-
+                        
                         <div className="space-y-2">
                           <Label htmlFor="creditScore">Credit Score (Estimated)</Label>
                           <Input
@@ -385,7 +387,7 @@ const LoanPage = () => {
                           />
                         </div>
                       </div>
-
+                      
                       <div className="space-y-2">
                         <Label htmlFor="purpose">Loan Purpose</Label>
                         <Input
@@ -399,9 +401,9 @@ const LoanPage = () => {
                           This helps us process your application more effectively
                         </p>
                       </div>
-
+                      
                       <div className="pt-4">
-                        <Button
+                        <Button 
                           type="submit"
                           disabled={loading || !loanType}
                           className="w-full bg-bank-primary hover:bg-bank-secondary"
@@ -419,7 +421,7 @@ const LoanPage = () => {
                           )}
                         </Button>
                       </div>
-
+                      
                       <div className="text-center text-sm text-gray-500">
                         By submitting this application, you agree to our <a href="#" className="text-bank-primary hover:underline">Terms of Service</a> and <a href="#" className="text-bank-primary hover:underline">Privacy Policy</a>
                       </div>
@@ -429,7 +431,7 @@ const LoanPage = () => {
               </Card>
             </div>
           </TabsContent>
-
+          
           {/* Active Loans Tab */}
           <TabsContent value="active" className="mt-6">
             {activeLoans.length === 0 ? (
@@ -441,7 +443,7 @@ const LoanPage = () => {
                     <p className="mt-1 text-sm text-gray-500">
                       You currently don't have any active loans
                     </p>
-                    <Button
+                    <Button 
                       className="mt-6 bg-bank-primary hover:bg-bank-secondary"
                       onClick={() => setActiveTab("apply")}
                     >
@@ -474,7 +476,7 @@ const LoanPage = () => {
                             <p className="font-semibold text-lg">{formatCurrency(loan.remainingBalance)}</p>
                           </div>
                         </div>
-
+                        
                         <div className="bg-gray-50 p-4 rounded-lg">
                           <div className="flex justify-between items-center mb-2">
                             <div className="flex items-center">
@@ -488,7 +490,7 @@ const LoanPage = () => {
                             <span className="font-semibold">{formatCurrency(loan.paymentAmount)}</span>
                           </div>
                         </div>
-
+                        
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm text-gray-500">Term</p>
@@ -507,8 +509,8 @@ const LoanPage = () => {
                           <div>
                             <p className="text-sm text-gray-500">Payoff Progress</p>
                             <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
-                              <div
-                                className="h-full bg-bank-primary"
+                              <div 
+                                className="h-full bg-bank-primary" 
                                 style={{ width: `${Math.round(100 - (loan.remainingBalance / loan.amount * 100))}%` }}
                               ></div>
                             </div>
@@ -517,7 +519,7 @@ const LoanPage = () => {
                             </p>
                           </div>
                         </div>
-
+                        
                         <div className="flex justify-between">
                           <Button variant="outline">
                             View Details
@@ -533,7 +535,7 @@ const LoanPage = () => {
               </div>
             )}
           </TabsContent>
-
+          
           {/* Applications Tab */}
           <TabsContent value="applications" className="mt-6">
             {applications.length === 0 ? (
@@ -545,7 +547,7 @@ const LoanPage = () => {
                     <p className="mt-1 text-sm text-gray-500">
                       You haven't applied for any loans yet
                     </p>
-                    <Button
+                    <Button 
                       className="mt-6 bg-bank-primary hover:bg-bank-secondary"
                       onClick={() => setActiveTab("apply")}
                     >
@@ -562,8 +564,8 @@ const LoanPage = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {applications.map((app) => (
-                      <div
-                        key={app.id}
+                      <div 
+                        key={app.id} 
                         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-4 last:border-0"
                       >
                         <div>
@@ -600,14 +602,14 @@ const LoanPage = () => {
                             </div>
                           </div>
                         </div>
-
+                        
                         <div className="flex space-x-2 w-full md:w-auto">
                           {app.status === "pending" && (
                             <>
                               <Button variant="outline" className="flex-1 md:flex-none">
                                 Cancel
                               </Button>
-                              <Button
+                              <Button 
                                 className="bg-bank-primary hover:bg-bank-secondary flex-1 md:flex-none"
                                 onClick={() => setActiveTab("apply")}
                               >
@@ -616,14 +618,14 @@ const LoanPage = () => {
                             </>
                           )}
                           {app.status === "approved" && (
-                            <Button
+                            <Button 
                               className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none"
                             >
                               Accept Offer <ChevronRight className="ml-2 h-4 w-4" />
                             </Button>
                           )}
                           {app.status === "rejected" && (
-                            <Button
+                            <Button 
                               className="bg-bank-primary hover:bg-bank-secondary flex-1 md:flex-none"
                               onClick={() => setActiveTab("apply")}
                             >
@@ -639,7 +641,7 @@ const LoanPage = () => {
             )}
           </TabsContent>
         </Tabs>
-
+        
         {/* Loan Information Cards */}
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Loan Information</h2>
@@ -675,7 +677,7 @@ const LoanPage = () => {
                 </ul>
               </CardContent>
             </Card>
-
+            
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="mb-4">
@@ -707,7 +709,7 @@ const LoanPage = () => {
                 </ul>
               </CardContent>
             </Card>
-
+            
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="mb-4">

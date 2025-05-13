@@ -1,16 +1,18 @@
-import {Link} from "react-router-dom"
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
+import { Link } from 'react-router-dom';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
     <footer className="bg-bank-primary text-white pt-12 pb-6">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-
+          {/* Company Info */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Bankit</h3>
-            <p className="mb-4 text-gray-300">Providing secure and innovative banking solutions since 2023. Your trusted partner for all financial needs.</p>
+            <h3 className="text-xl font-semibold mb-4">BankHive</h3>
+            <p className="mb-4 text-gray-300">
+              Providing secure and innovative banking solutions since 2023. Your trusted partner for all financial needs.
+            </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
                 <Facebook size={20} />
@@ -26,9 +28,10 @@ const Footer = () => {
               </a>
             </div>
           </div>
-
+          
+          {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Quickies</h3>
+            <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="text-gray-300 hover:text-white transition-colors">Home</Link></li>
               <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
@@ -37,7 +40,8 @@ const Footer = () => {
               <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
-
+          
+          {/* Services */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Banking Services</h3>
             <ul className="space-y-2">
@@ -48,7 +52,8 @@ const Footer = () => {
               <li><Link to="/insurance" className="text-gray-300 hover:text-white transition-colors">Insurance</Link></li>
             </ul>
           </div>
-
+          
+          {/* Contact Info */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
             <div className="space-y-3">
@@ -67,11 +72,10 @@ const Footer = () => {
             </div>
           </div>
         </div>
-
+        
         <div className="border-t border-gray-700 mt-8 pt-6">
           <p className="text-center text-gray-400">© {new Date().getFullYear()} BankHive. All rights reserved.</p>
         </div>
-
       </div>
     </footer>
   );

@@ -1,4 +1,5 @@
-import {useState} from "react";
+
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,13 +8,12 @@ import { Eye, EyeOff, UserPlus } from "lucide-react";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    name : "",
-    email : "",
-    password : "",
-    confirmPassword : "",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-
-  const [showPassword, setShowPassword] = useState(fasle);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -23,41 +23,39 @@ const RegisterPage = () => {
   };
 
   const validateForm = () => {
-    if(!formData.name || !formData.email || !formData.password || !formData.confirmPassword){
-      toast.error("all the fields are required");
-      return fasle;
-    }
-
-    if(formData.password !== formData.confirmPassword){
-      toast.error("the passwords do not match");
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      toast.error("All fields are required");
       return false;
     }
 
-    if(formData.password.length < 6){
-      toast.error("password must be atleast 6 digits long");
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
       return false;
     }
 
     return true;
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()){
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
-    try{
-      // API request ot the mbackend
-
+    try {
+      // Send registration request to backend
       const response = await fetch("http://localhost:5000/api/register", {
-        method : "POST",
-        headers :{
-          "Content-type" : "application/json"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: formData.name,
@@ -68,24 +66,22 @@ const RegisterPage = () => {
 
       const data = await response.json();
 
-      if(!response.ok){
-        throw new Error(data.message || "the Registration failed");
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
       }
 
-      toast.success("Registration successfull!!! Please login.");
+      toast.success("Registration successful! Please login.");
       navigate("/login");
-    }
-    catch(error){
-      console.error("Registration Error : ", error);
-      toast.error(error.message || "Registration failed Please try again")
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error(error.message || "Registration failed. Please try again.");
 
-      //dummy check :
+      // For demo purposes, simulate successful registration when backend is not available
       if (!window.location.hostname.includes("localhost")) {
         toast.success("Demo registration successful! Please login.");
         navigate("/login");
       }
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
   };
