@@ -1,7 +1,7 @@
 
-# BankHive - Full Stack Banking Application
+# BankIt - Full Stack Banking Application
 
-BankHive is a comprehensive banking web application with a React frontend and a Flask backend. This application provides user authentication, account management, transactions, loan applications, and more.
+BankIt is a comprehensive banking web application with a React frontend and a Flask backend. This application provides user authentication, account management, transactions, loan applications, and more.
 
 ## Features
 
@@ -16,6 +16,7 @@ BankHive is a comprehensive banking web application with a React frontend and a 
 
 ### Frontend
 - React (JavaScript/JSX)
+- Some TypeScript (TSX)
 - React Router for navigation
 - Tailwind CSS for styling
 - shadcn/ui component library
@@ -30,7 +31,7 @@ BankHive is a comprehensive banking web application with a React frontend and a 
 ## Project Structure
 
 ```
-bankhive/
+banking/
 ├── frontend/       # React frontend
 │   ├── public/     # Static assets
 │   └── src/        # Source files
@@ -52,8 +53,8 @@ bankhive/
 ### Backend Setup
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/bankhive.git
-   cd bankhive/backend
+   git clone https://github.com/Prajwal-Jagadeesh-Guliyavar/banking.git
+   cd banking/backend
    ```
 
 2. Create and activate a virtual environment:
