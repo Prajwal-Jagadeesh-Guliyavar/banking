@@ -111,8 +111,8 @@ const TransactionsPage = () => {
         name: userData.name,
         accountNumber: userData.accountNumber,
       });
-
-      setTransactions(transactionsData);
+      console.log("transactionsData:", transactionsData);
+      setTransactions(transactionsData.transactions);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -142,10 +142,10 @@ const TransactionsPage = () => {
   }
 
   const amount = parseFloat(newTransaction.amount);
-  // if (isNaN(amount) {
-  //   toast.error("Please enter a valid amount");
-  //   return;
-  // }
+  if (isNaN(amount) ){
+    toast.error("Please enter a valid amount");
+    return;
+  }
 
   try {
     const token = localStorage.getItem("authToken");
@@ -156,8 +156,9 @@ const TransactionsPage = () => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        transaction_type: newTransaction.type, // Match server's expected field name
-        amount: newTransaction.type === "withdrawal" ? -amount : amount,
+        type: newTransaction.type, // Match server's expected field name
+        //amount: newTransaction.type === "withdrawal" ? -amount : amount,
+        amount : amount,
         description: newTransaction.description,
         currency: "INR" // Add currency field if required by backend
       }),
@@ -169,7 +170,15 @@ const TransactionsPage = () => {
       throw new Error(data.message || "Failed to create transaction");
     }
 
-    setTransactions([data, ...transactions]);
+    const enhancedTransaction = {
+      ...data,
+      // Extract merchant from description if not provided
+      merchant: data.merchant || data.description.split(" - ")[0],
+      // Set default status if not provided
+      status: data.status || "completed",
+    };
+
+    setTransactions([enhancedTransaction, ...transactions]);
 
     // Update balance
     const newBalance = userData.balance + data.amount;
@@ -332,7 +341,7 @@ const TransactionsPage = () => {
                             className="pl-8"
                             placeholder="0.00"
                             type="number"
-                            step="0.01"
+                            step="1"
                             min="0.01"
                           />
                         </div>
@@ -406,8 +415,8 @@ const TransactionsPage = () => {
                 <Tabs defaultValue="all" value={filter} onValueChange={handleFilterChange} className="w-full sm:w-auto">
                   <TabsList className="w-full grid grid-cols-3">
                     <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="deposits">Deposits</TabsTrigger>
-                    <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+                    {/* <TabsTrigger value="deposits">Deposits</TabsTrigger>
+                    <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger> */}
                   </TabsList>
                 </Tabs>
               </div>
@@ -468,7 +477,7 @@ const TransactionsPage = () => {
                             )}
                           </div>
                         </th>
-                        <th className="pb-3 font-medium text-right">Status</th>
+                        <th className="pb-3 font-medium text-right">Mode</th>
                         <th
                           className="pb-3 font-medium text-right cursor-pointer"
                           onClick={() => handleSort("amount")}
@@ -505,19 +514,19 @@ const TransactionsPage = () => {
                             </div>
                           </td>
                           <td className="py-4 text-right">
-                            {transaction.status === "completed" ? (
+                            {transaction.type === "deposit" ? (
                               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                Completed
+                                Credit
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                                Pending
+                                Debit
                               </Badge>
                             )}
                           </td>
                           <td className={`py-4 text-right font-medium ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                             <div className="flex items-center justify-end">
-                              {transaction.amount > 0 ? <ArrowUpRight size={16} className="mr-1" /> : <ArrowDownRight size={16} className="mr-1" />}
+                              {transaction.type == "deposit" ? <ArrowUpRight size={16} className="mr-1" /> : <ArrowDownRight size={16} className="mr-1" />}
                               {formatCurrency(transaction.amount)}
                             </div>
                           </td>
