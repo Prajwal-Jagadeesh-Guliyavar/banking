@@ -726,11 +726,6 @@ def delete_loan_application(application_id):
         return jsonify({"error": "Failed to cancel application"}), 500
 
 
-from flask import jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
-import bcrypt
-from datetime import datetime
-
 @app.route('/api/profile', methods=['GET'])
 @jwt_required()
 def get_user_profile():

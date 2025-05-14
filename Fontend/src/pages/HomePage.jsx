@@ -1,8 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { 
-  Shield, Users, TrendingUp, CreditCard, 
+import {
+  Shield, Users, TrendingUp, CreditCard,
   Smartphone, Globe, CheckCircle2, Award
 } from "lucide-react";
 
@@ -47,7 +47,7 @@ const HomePage = () => {
                         <CheckCircle2 className="text-bank-primary" size={20} />
                       </div>
                     </div>
-                    
+
                     <div>
                       <p className="text-white/70 text-sm mb-1">Current Balance</p>
                       <p className="text-white font-bold text-3xl">$12,750.00</p>
@@ -56,7 +56,7 @@ const HomePage = () => {
                         <span className="text-green-400 text-sm">+2.4% this month</span>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4">
                       <div className="bg-white/20 h-12 w-64 rounded-lg"></div>
                     </div>
@@ -79,7 +79,7 @@ const HomePage = () => {
               Experience banking designed to meet your needs with advanced security, personalized service, and innovative solutions.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
@@ -114,7 +114,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       {/* Services Section */}
       <section className="py-16 bg-bank-light">
         <div className="container mx-auto px-6">
@@ -124,7 +124,7 @@ const HomePage = () => {
               Comprehensive financial solutions to support every stage of your life journey
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
@@ -161,7 +161,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       {/* Testimonials Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-6">
@@ -171,7 +171,7 @@ const HomePage = () => {
               Don't just take our word for it - hear from our satisfied customers
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
@@ -209,7 +209,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-bank-primary to-bank-secondary text-white">
         <div className="container mx-auto px-6 text-center">

@@ -156,12 +156,12 @@ const DashboardPage = () => {
     });
   };
 
-  if (loading) {
+    if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bank-light">
+      <div className="min-h-screen flex items-center justify-center bg-brand-dark">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-bank-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+          <div className="w-16 h-16 border-4 border-t-brand-orange border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-brand-gray">Loading your dashboard...</p>
         </div>
       </div>
     );
