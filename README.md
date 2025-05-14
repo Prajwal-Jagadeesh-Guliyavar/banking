@@ -108,18 +108,19 @@ The backend provides the following API endpoints:
 
 ### User Management
 - `GET /api/user`: Get user details
-- `PUT /api/profile`: Update user profile information
+- `GET /api/profile`: Get user profile information
+- `PUT /api/profile/update`: Update user profile information
 - `PUT /api/profile/password`: Change user password
 
 ### Transactions
 - `GET /api/transactions`: List user transactions
 - `POST /api/transactions`: Create a new transaction
-- `GET /api/transactions/:id`: Get details of a specific transaction
 
 ### Loans
 - `GET /api/loans`: List active loans
 - `POST /api/loan/apply`: Submit a new loan application
 - `GET /api/loan/applications`: List loan applications
+- `DELETE /api/loan/applications/<int:application_id>`: Delete a particular loan applications
 
 ## Database Schema
 
