@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,69 +37,36 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Try to get user data from localStorage first
-        const storedUser = localStorage.getItem("user");
-
-        if (storedUser) {
-          const user = JSON.parse(storedUser);
-          const mockUserData = {
-            name: user.name || "Demo User",
-            email: user.email || "demo@example.com",
-            phone: "+1 (555) 123-4567",
-            address: "123 Main St, Anytown, USA",
-            accountNumber: user.accountNumber || "1234567890",
-            accountType: user.accountType || "Savings",
-            joinDate: user.joined || "January 2023",
-          };
-
-          setUserData(mockUserData);
-          setFormData({
-            name: mockUserData.name,
-            email: mockUserData.email,
-            phone: mockUserData.phone,
-            address: mockUserData.address,
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
-          });
-          setLoading(false);
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          window.location.href = "/login";
           return;
         }
 
-        // In a real application, would fetch from backend
-        // const token = localStorage.getItem("authToken");
-        // const response = await fetch("http://localhost:5000/api/profile", {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
-        // const data = await response.json();
-        // setUserData(data);
-        // setFormData({ ...data, currentPassword: "", newPassword: "", confirmPassword: "" });
-
-        // For demo purposes, use mock data
-        const mockUserData = {
-          name: "Demo User",
-          email: "demo@example.com",
-          phone: "+1 (555) 123-4567",
-          address: "123 Main St, Anytown, USA",
-          accountNumber: "1234567890",
-          accountType: "Savings",
-          joinDate: "January 2023",
-        };
-
-        setUserData(mockUserData);
-        setFormData({
-          name: mockUserData.name,
-          email: mockUserData.email,
-          phone: mockUserData.phone,
-          address: mockUserData.address,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
+        const response = await fetch("http://localhost:5000/api/profile", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
         });
-        setLoading(false);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile data");
+        }
+
+        const data = await response.json();
+        setUserData(data);
+        setFormData(prev => ({
+          ...prev,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          address: data.address
+        }));
+
       } catch (error) {
-        console.error("Error fetching user data:", error);
-        toast.error("Failed to load profile information");
+        toast.error(error.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -118,50 +84,32 @@ const ProfilePage = () => {
     setSaving(true);
 
     try {
-      // In a real application, would send to backend
-      // const token = localStorage.getItem("authToken");
-      // const response = await fetch("http://localhost:5000/api/profile", {
-      //   method: "PUT",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     email: formData.email,
-      //     phone: formData.phone,
-      //     address: formData.address,
-      //   }),
-      // });
-      // const data = await response.json();
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("http://localhost:5000/api/profile/update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+        }),
+      });
 
-      // For demo purposes, simulate API request
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Update user data
-      const updatedUserData = {
-        ...userData,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-      };
-
-      setUserData(updatedUserData);
-
-      // Update localStorage
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        user.name = formData.name;
-        user.email = formData.email;
-        localStorage.setItem("user", JSON.stringify(user));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update profile");
       }
 
+      const updatedData = await response.json();
+      setUserData(updatedData);
       toast.success("Profile updated successfully");
+
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
+      toast.error(error.message);
     } finally {
       setSaving(false);
     }
@@ -188,35 +136,34 @@ const ProfilePage = () => {
     setSaving(true);
 
     try {
-      // In a real application, would send to backend
-      // const token = localStorage.getItem("authToken");
-      // const response = await fetch("http://localhost:5000/api/profile/password", {
-      //   method: "PUT",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({
-      //     currentPassword: formData.currentPassword,
-      //     newPassword: formData.newPassword,
-      //   }),
-      // });
-      // const data = await response.json();
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("http://localhost:5000/api/profile/password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
 
-      // For demo purposes, simulate API request
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update password");
+      }
 
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
-      });
+      }));
 
       toast.success("Password updated successfully");
     } catch (error) {
-      console.error("Error updating password:", error);
-      toast.error("Failed to update password");
+      toast.error(error.message);
     } finally {
       setSaving(false);
     }
