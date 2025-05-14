@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,47 @@ import {
   Book
 } from "lucide-react";
 
+const fetchWithAuth = async (url, options = {}) => {
+  const token = localStorage.getItem("authToken");
+
+  if (!token) {
+    // Redirect to login or show login modal
+    window.location.href = "/login"; // Adjust based on your auth flow
+    throw new Error("Redirecting to login...");
+  }
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    });
+
+    if (response.status === 401) {
+      // Token expired, handle refresh or redirect
+      localStorage.removeItem("authToken");
+      window.location.href = "/login";
+      throw new Error("Session expired, please login again");
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Request failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API request failed:", error);
+    throw error;
+  }
+};
+
 const LoanPage = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("apply");
   const [loanType, setLoanType] = useState("personal");
   const [loanAmount, setLoanAmount] = useState(10000);
@@ -35,34 +75,55 @@ const LoanPage = () => {
     purpose: "",
   });
   const [loading, setLoading] = useState(false);
-  
-  // Mock data for active loans
-  const [activeLoans, setActiveLoans] = useState([
-    {
-      id: "loan-1",
-      type: "Personal Loan",
-      amount: 10000,
-      remainingBalance: 7250,
-      paymentAmount: 305.56,
-      nextPaymentDate: "2023-06-15",
-      term: 36,
-      startDate: "2023-01-15",
-      rate: 5.25,
-      status: "active",
+  const [activeLoans, setActiveLoans] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+
+  useEffect(() => {
+  const fetchData = async () => {
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      window.location.href = "/login";
+      return;
     }
-  ]);
-  
-  // Mock data for loan applications
-  const [applications, setApplications] = useState([
-    {
-      id: "app-1",
-      type: "Personal Loan",
-      amount: 15000,
-      date: "2023-05-25",
-      status: "pending",
-      term: 120,
+
+    setIsLoadingData(true);
+    try {
+      // Fetch both loans and applications in parallel
+      const [loansResponse, applicationsResponse] = await Promise.all([
+        fetchWithAuth("http://localhost:5000/api/loan"),
+        fetchWithAuth("http://localhost:5000/api/loan/applications")
+      ]);
+
+      // Process loans data
+      setActiveLoans(loansResponse.loans.map(loan => ({
+        ...loan,
+        paymentAmount: calculateMonthlyPayment(loan.amount, loan.interestRate, loan.termMonths),
+        remainingBalance: loan.amount, // You'll need to get this from backend
+        nextPaymentDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Temp: next month
+      })));
+
+      // Process applications data
+      setApplications(applicationsResponse.applications.map(app => ({
+        ...app,
+        term: app.termMonths || 36 // Fallback to 36 months if not provided
+      })));
+
+    } catch (error) {
+      console.error("Failed to fetch loan data:", error);
+      toast.error(error.message || "Failed to load loan data");
+    } finally {
+      setIsLoadingData(false);
     }
-  ]);
+  };
+
+  // Only fetch data when not on the apply tab
+  if (activeTab !== "apply") {
+    fetchData();
+  }
+}, [activeTab]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -75,90 +136,102 @@ const LoanPage = () => {
 
   const handleLoanTypeChange = (value) => {
     setLoanType(value);
-    
-    // Set default loan amounts based on type
     setLoanAmount(10000);
     setLoanTerm(36);
   };
 
-  const calculateMonthlyPayment = () => {
-    // Calculate interest rates based on loan type
-    const rate = 5.25;
-    
-    // Convert annual rate to monthly
+  const calculateMonthlyPayment = (principal, rate, term) => {
     const monthlyRate = rate / 100 / 12;
-    
-    // Calculate monthly payment using formula: P * r * (1 + r)^n / ((1 + r)^n - 1)
-    const payment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm) / (Math.pow(1 + monthlyRate, loanTerm) - 1);
-    
-    return {
-      payment: payment.toFixed(2),
-      rate: rate,
-      totalInterest: ((payment * loanTerm) - loanAmount).toFixed(2),
-      totalPayment: (payment * loanTerm).toFixed(2),
-    };
+    const payment = principal * monthlyRate * Math.pow(1 + monthlyRate, term) /
+      (Math.pow(1 + monthlyRate, term) - 1);
+    return payment.toFixed(2);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Form validation
-    if (!loanType || loanAmount <= 0 || loanTerm <= 0) {
-      toast.error("Please select a loan type and specify amount and term");
-      return;
-    }
-    
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.income || !formData.creditScore) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      // In a real application, would send to backend
-      // For demo purposes, simulate API request
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Add new application to list
-      const newApplication = {
-        id: `app-${Date.now()}`,
+  e.preventDefault();
+
+  if (!loanType || loanAmount <= 0 || loanTerm <= 0) {
+    toast.error("Please select a loan type and specify amount and term");
+    return;
+  }
+
+  if (!formData.fullName || !formData.email || !formData.phone || !formData.income || !formData.creditScore) {
+    toast.error("Please fill in all required fields");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // Submit loan application
+    const result = await fetchWithAuth("http://localhost:5000/api/loan/apply", {
+      method: "POST",
+      body: JSON.stringify({
         type: "Personal Loan",
         amount: loanAmount,
-        date: new Date().toISOString().split("T")[0],
-        status: "pending",
-        term: loanTerm,
-      };
-      
-      setApplications([newApplication, ...applications]);
-      
-      // Reset form
-      setLoanType("personal");
-      setLoanAmount(10000);
-      setLoanTerm(36);
-      setFormData({
-        fullName: "",
-        email: "",
-        phone: "",
-        income: "",
-        employment: "employed",
-        creditScore: "",
-        purpose: "",
-      });
-      
-      toast.success("Loan application submitted successfully!");
-      setActiveTab("applications");
-    } catch (error) {
-      console.error("Error submitting loan application:", error);
-      toast.error("Failed to submit loan application");
-    } finally {
-      setLoading(false);
-    }
-  };
+        purpose: formData.purpose,
+        income: parseFloat(formData.income),
+        employmentStatus: formData.employment,
+        termMonths: loanTerm
+      }),
+    });
 
-  const getLoanTypeName = () => {
-    return "Personal Loan";
-  };
+    toast.success(`Loan application ${result.status}`);
+
+    // Refresh both loans and applications in parallel
+    const [loans, applications] = await Promise.all([
+      fetchWithAuth("http://localhost:5000/api/loan"),
+      fetchWithAuth("http://localhost:5000/api/loan/applications")
+    ]);
+    setActiveLoans(loans.loans);
+    setApplications(applications.applications);
+
+    // Reset form
+    setLoanType("personal");
+    setLoanAmount(10000);
+    setLoanTerm(36);
+    setFormData({
+      fullName: "",
+      email: "",
+      phone: "",
+      income: "",
+      employment: "employed",
+      creditScore: "",
+      purpose: "",
+    });
+
+    setActiveTab("applications");
+  } catch (error) {
+    console.error("Error submitting loan application:", error);
+    toast.error(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleCancelApplication = async (applicationId) => {
+  try {
+    const response = await fetchWithAuth(
+      `http://localhost:5000/api/loan/applications/${applicationId}`,
+      {
+        method: "DELETE"
+      }
+    );
+
+    if (response.ok) {
+      toast.success("Application cancelled successfully");
+      // Refresh the applications list
+      const appsResponse = await fetchWithAuth("http://localhost:5000/api/loan/applications");
+      setApplications(appsResponse.applications);
+    } else {
+      throw new Error("Failed to cancel application");
+    }
+  } catch (error) {
+    console.error("Error cancelling application:", error);
+    toast.error(error.message || "Failed to cancel application");
+  }
+};
+
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -178,6 +251,21 @@ const LoanPage = () => {
     });
   };
 
+  const getStatusBadge = (status) => {
+    switch (status.toLowerCase()) {
+      case 'approved':
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{status}</Badge>;
+      case 'pending':
+        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">{status}</Badge>;
+      case 'rejected':
+      case 'declined':
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">{status}</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">{status}</Badge>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-bank-light pb-12">
       {/* Page Header */}
@@ -187,7 +275,7 @@ const LoanPage = () => {
           <p className="text-white/80 mt-1">Apply for loans or check your existing loan status</p>
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="apply" value={activeTab} onValueChange={setActiveTab} className="-mt-12 relative z-10">
           <div className="bg-white p-3 rounded-lg shadow-md inline-block">
@@ -197,7 +285,7 @@ const LoanPage = () => {
               <TabsTrigger value="applications">Applications</TabsTrigger>
             </TabsList>
           </div>
-          
+
           {/* Apply for Loan Tab */}
           <TabsContent value="apply" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -218,7 +306,7 @@ const LoanPage = () => {
                       <span>Personal Loan</span>
                     </Button>
                   </div>
-                  
+
                   {loanType && (
                     <>
                       <div className="mt-8">
@@ -241,7 +329,7 @@ const LoanPage = () => {
                           <span>{formatCurrency(100000)}</span>
                         </div>
                       </div>
-                      
+
                       <div className="mt-6">
                         <Label htmlFor="loan-term" className="text-base flex justify-between">
                           <span>Loan Term</span>
@@ -264,7 +352,7 @@ const LoanPage = () => {
                           <span>10 years</span>
                         </div>
                       </div>
-                      
+
                       <Card className="mt-8 bg-gray-50">
                         <CardHeader className="pb-2">
                           <div className="flex justify-between items-center">
@@ -276,19 +364,19 @@ const LoanPage = () => {
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span className="text-gray-500">Monthly Payment</span>
-                              <span className="font-semibold">${calculateMonthlyPayment().payment}</span>
+                              <span className="font-semibold">{formatCurrency(calculateMonthlyPayment(loanAmount, 5.25, loanTerm))}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Interest Rate</span>
-                              <span className="font-semibold">{calculateMonthlyPayment().rate}%</span>
+                              <span className="font-semibold">5.25%</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Total Interest</span>
-                              <span className="font-semibold">${calculateMonthlyPayment().totalInterest}</span>
+                              <span className="font-semibold">{formatCurrency((calculateMonthlyPayment(loanAmount, 5.25, loanTerm) * loanTerm - loanAmount))}</span>
                             </div>
                             <div className="flex justify-between border-t border-gray-200 pt-2 mt-2">
                               <span className="font-medium">Total Payment</span>
-                              <span className="font-semibold">${calculateMonthlyPayment().totalPayment}</span>
+                              <span className="font-semibold">{formatCurrency(calculateMonthlyPayment(loanAmount, 5.25, loanTerm) * loanTerm)}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -297,7 +385,7 @@ const LoanPage = () => {
                   )}
                 </CardContent>
               </Card>
-              
+
               {/* Loan Application Form */}
               <Card className="shadow-md lg:col-span-2">
                 <CardHeader>
@@ -316,9 +404,10 @@ const LoanPage = () => {
                             value={formData.fullName}
                             onChange={handleInputChange}
                             placeholder="John Doe"
+                            required
                           />
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="email">Email Address</Label>
                           <Input
@@ -328,9 +417,10 @@ const LoanPage = () => {
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="john@example.com"
+                            required
                           />
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="phone">Phone Number</Label>
                           <Input
@@ -339,9 +429,10 @@ const LoanPage = () => {
                             value={formData.phone}
                             onChange={handleInputChange}
                             placeholder="+1 (555) 123-4567"
+                            required
                           />
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="income">Annual Income</Label>
                           <div className="relative">
@@ -349,14 +440,16 @@ const LoanPage = () => {
                             <Input
                               id="income"
                               name="income"
+                              type="number"
                               value={formData.income}
                               onChange={handleInputChange}
                               className="pl-8"
                               placeholder="60,000"
+                              required
                             />
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="employment">Employment Status</Label>
                           <Select
@@ -375,19 +468,23 @@ const LoanPage = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="creditScore">Credit Score (Estimated)</Label>
                           <Input
                             id="creditScore"
                             name="creditScore"
+                            type="number"
                             value={formData.creditScore}
                             onChange={handleInputChange}
                             placeholder="700"
+                            min="300"
+                            max="850"
+                            required
                           />
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="purpose">Loan Purpose</Label>
                         <Input
@@ -401,9 +498,9 @@ const LoanPage = () => {
                           This helps us process your application more effectively
                         </p>
                       </div>
-                      
+
                       <div className="pt-4">
-                        <Button 
+                        <Button
                           type="submit"
                           disabled={loading || !loanType}
                           className="w-full bg-bank-primary hover:bg-bank-secondary"
@@ -421,7 +518,7 @@ const LoanPage = () => {
                           )}
                         </Button>
                       </div>
-                      
+
                       <div className="text-center text-sm text-gray-500">
                         By submitting this application, you agree to our <a href="#" className="text-bank-primary hover:underline">Terms of Service</a> and <a href="#" className="text-bank-primary hover:underline">Privacy Policy</a>
                       </div>
@@ -431,10 +528,14 @@ const LoanPage = () => {
               </Card>
             </div>
           </TabsContent>
-          
+
           {/* Active Loans Tab */}
           <TabsContent value="active" className="mt-6">
-            {activeLoans.length === 0 ? (
+            {isLoadingData ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-bank-primary"></div>
+              </div>
+            ) : activeLoans.length === 0 ? (
               <Card className="shadow-md">
                 <CardContent className="py-12">
                   <div className="text-center">
@@ -443,7 +544,7 @@ const LoanPage = () => {
                     <p className="mt-1 text-sm text-gray-500">
                       You currently don't have any active loans
                     </p>
-                    <Button 
+                    <Button
                       className="mt-6 bg-bank-primary hover:bg-bank-secondary"
                       onClick={() => setActiveTab("apply")}
                     >
@@ -459,9 +560,7 @@ const LoanPage = () => {
                     <CardHeader>
                       <div className="flex justify-between items-center">
                         <CardTitle>{loan.type}</CardTitle>
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                          Active
-                        </Badge>
+                        {getStatusBadge(loan.status)}
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -473,53 +572,53 @@ const LoanPage = () => {
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Remaining Balance</p>
-                            <p className="font-semibold text-lg">{formatCurrency(loan.remainingBalance)}</p>
+                            <p className="font-semibold text-lg">{formatCurrency(loan.remainingBalance || loan.amount)}</p>
                           </div>
                         </div>
-                        
+
                         <div className="bg-gray-50 p-4 rounded-lg">
                           <div className="flex justify-between items-center mb-2">
                             <div className="flex items-center">
                               <Calendar className="h-4 w-4 text-gray-500 mr-2" />
                               <span className="text-sm">Next Payment</span>
                             </div>
-                            <span className="font-semibold">{formatDate(loan.nextPaymentDate)}</span>
+                            <span className="font-semibold">{loan.nextPaymentDate ? formatDate(loan.nextPaymentDate) : 'N/A'}</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">Payment Amount</span>
-                            <span className="font-semibold">{formatCurrency(loan.paymentAmount)}</span>
+                            <span className="font-semibold">{formatCurrency(loan.paymentAmount || calculateMonthlyPayment(loan.amount, loan.interestRate, loan.termMonths))}</span>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm text-gray-500">Term</p>
                             <p className="font-medium">
-                              {loan.term} months ({Math.floor(loan.term / 12)} years)
+                              {loan.termMonths} months ({Math.floor(loan.termMonths / 12)} years)
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Interest Rate</p>
-                            <p className="font-medium">{loan.rate}%</p>
+                            <p className="font-medium">{loan.interestRate}%</p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Start Date</p>
-                            <p className="font-medium">{formatDate(loan.startDate)}</p>
+                            <p className="font-medium">{formatDate(loan.date)}</p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Payoff Progress</p>
                             <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
-                              <div 
-                                className="h-full bg-bank-primary" 
-                                style={{ width: `${Math.round(100 - (loan.remainingBalance / loan.amount * 100))}%` }}
+                              <div
+                                className="h-full bg-bank-primary"
+                                style={{ width: `${Math.round(100 - ((loan.remainingBalance || loan.amount) / loan.amount * 100))}%` }}
                               ></div>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                              {Math.round(100 - (loan.remainingBalance / loan.amount * 100))}% paid off
+                              {Math.round(100 - ((loan.remainingBalance || loan.amount) / loan.amount * 100))}% paid off
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex justify-between">
                           <Button variant="outline">
                             View Details
@@ -535,10 +634,14 @@ const LoanPage = () => {
               </div>
             )}
           </TabsContent>
-          
+
           {/* Applications Tab */}
           <TabsContent value="applications" className="mt-6">
-            {applications.length === 0 ? (
+            {isLoadingData ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-bank-primary"></div>
+              </div>
+            ) : applications.length === 0 ? (
               <Card className="shadow-md">
                 <CardContent className="py-12">
                   <div className="text-center">
@@ -547,7 +650,7 @@ const LoanPage = () => {
                     <p className="mt-1 text-sm text-gray-500">
                       You haven't applied for any loans yet
                     </p>
-                    <Button 
+                    <Button
                       className="mt-6 bg-bank-primary hover:bg-bank-secondary"
                       onClick={() => setActiveTab("apply")}
                     >
@@ -564,28 +667,14 @@ const LoanPage = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {applications.map((app) => (
-                      <div 
-                        key={app.id} 
+                      <div
+                        key={app.id}
                         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-4 last:border-0"
                       >
                         <div>
                           <div className="flex items-center space-x-2">
                             <h3 className="font-semibold">{app.type}</h3>
-                            {app.status === "approved" && (
-                              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                                Approved
-                              </Badge>
-                            )}
-                            {app.status === "pending" && (
-                              <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                                Pending
-                              </Badge>
-                            )}
-                            {app.status === "rejected" && (
-                              <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-                                Rejected
-                              </Badge>
-                            )}
+                            {getStatusBadge(app.status)}
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-1 mt-2">
                             <div>
@@ -594,7 +683,7 @@ const LoanPage = () => {
                             </div>
                             <div>
                               <p className="text-sm text-gray-500">Term</p>
-                              <p className="font-medium">{app.term} months</p>
+                              <p className="font-medium">{app.termMonths || app.term} months</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-500">Application Date</p>
@@ -602,30 +691,34 @@ const LoanPage = () => {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex space-x-2 w-full md:w-auto">
-                          {app.status === "pending" && (
+                          {app.status.toLowerCase() === "pending" && (
                             <>
-                              <Button variant="outline" className="flex-1 md:flex-none">
-                                Cancel
+                              <Button
+                                variant="outline"
+                                className="flex-1 md:flex-none"
+                                onClick={() => handleCancelApplication(app.id)}
+                                disabled={loading}  // Optional: disable during operation
+                              >
+                                {loading ? "Cancelling..." : "Cancel"}
                               </Button>
-                              <Button 
+                              <Button
                                 className="bg-bank-primary hover:bg-bank-secondary flex-1 md:flex-none"
-                                onClick={() => setActiveTab("apply")}
                               >
                                 View Details <ChevronRight className="ml-2 h-4 w-4" />
                               </Button>
                             </>
                           )}
-                          {app.status === "approved" && (
-                            <Button 
+                          {app.status.toLowerCase() === "approved" && (
+                            <Button
                               className="bg-green-600 hover:bg-green-700 flex-1 md:flex-none"
                             >
                               Accept Offer <ChevronRight className="ml-2 h-4 w-4" />
                             </Button>
                           )}
-                          {app.status === "rejected" && (
-                            <Button 
+                          {app.status.toLowerCase() === "rejected" && (
+                            <Button
                               className="bg-bank-primary hover:bg-bank-secondary flex-1 md:flex-none"
                               onClick={() => setActiveTab("apply")}
                             >
@@ -641,7 +734,7 @@ const LoanPage = () => {
             )}
           </TabsContent>
         </Tabs>
-        
+
         {/* Loan Information Cards */}
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Loan Information</h2>
@@ -677,7 +770,7 @@ const LoanPage = () => {
                 </ul>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="mb-4">
@@ -709,7 +802,7 @@ const LoanPage = () => {
                 </ul>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-md">
               <CardContent className="pt-6">
                 <div className="mb-4">
