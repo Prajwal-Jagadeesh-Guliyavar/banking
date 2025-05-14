@@ -6,9 +6,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import sqlite3
 from datetime import datetime, timedelta
+from flask_jwt_extended import jwt_required, get_jwt_identity
+import bcrypt
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:8080"],  # Adjust to your React app's URL
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Configuration
 app.config["JWT_SECRET_KEY"] = "bank-hive-secret-key"  # Change this in production!
@@ -540,11 +548,14 @@ def create_transaction():
         return jsonify({"error": "Failed to process transaction"}), 500
 
 # Routes for loans
-@app.route("/api/loans", methods=["GET"])
+@app.route("/api/loan", methods=["GET"])
 @jwt_required()
 def get_loans():
     try:
         user_id = get_jwt_identity()
+
+        if not user_id:
+            return jsonify({"error": "Invalid user identity"}), 422
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -574,7 +585,7 @@ def get_loans():
 
     except Exception as e:
         print(f"Get loans error: {str(e)}")
-        return jsonify({"error": "Failed to retrieve loans"}), 500
+        return jsonify({"error": "Failed to retrieve loans", "details" : str(e)}), 500
 
 @app.route("/api/loan/apply", methods=["POST"])
 @jwt_required()
@@ -681,6 +692,188 @@ def get_loan_applications():
     except Exception as e:
         print(f"Get loan applications error: {str(e)}")
         return jsonify({"error": "Failed to retrieve loan applications"}), 500
+
+@app.route("/api/loan/applications/<int:application_id>", methods=["DELETE"])
+@jwt_required()
+def delete_loan_application(application_id):
+    try:
+        user_id = get_jwt_identity()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Verify the application belongs to the user
+        cursor.execute("""
+            SELECT id FROM loan_applications
+            WHERE id = ? AND user_id = ?
+        """, (application_id, user_id))
+
+        if not cursor.fetchone():
+            return jsonify({"error": "Application not found or access denied"}), 404
+
+        # Delete the application
+        cursor.execute("""
+            DELETE FROM loan_applications
+            WHERE id = ?
+        """, (application_id,))
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "Application cancelled successfully"}), 200
+
+    except Exception as e:
+        print(f"Error deleting application: {str(e)}")
+        return jsonify({"error": "Failed to cancel application"}), 500
+
+
+from flask import jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+import bcrypt
+from datetime import datetime
+
+@app.route('/api/profile', methods=['GET'])
+@jwt_required()
+def get_user_profile():
+    try:
+        user_id = get_jwt_identity()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Get user info
+        cursor.execute("""
+            SELECT u.id, u.name, u.email, u.phone, u.address, u.created_at,
+                   a.account_number, a.account_type
+            FROM users u
+            LEFT JOIN accounts a ON u.id = a.user_id
+            WHERE u.id = ?
+        """, (user_id,))
+
+        user = cursor.fetchone()
+        conn.close()
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify({
+            "name": user["name"],
+            "email": user["email"],
+            "phone": user["phone"],
+            "address": user["address"],
+            "accountNumber": user["account_number"],
+            "accountType": user["account_type"],
+            "joinDate": datetime.strptime(user["created_at"], "%Y-%m-%d %H:%M:%S").strftime("%B %Y")
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching profile: {str(e)}")
+        return jsonify({"error": "Failed to fetch profile"}), 500
+
+@app.route('/api/profile/update', methods=['PUT'])  # Changed endpoint to avoid conflict
+@jwt_required()
+def update_user_profile():
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+
+        required_fields = ['name', 'email', 'phone', 'address']
+        if not all(field in data for field in required_fields):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if email already exists for another user
+        cursor.execute("SELECT id FROM users WHERE email = ? AND id != ?", (data['email'], user_id))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({"error": "Email already in use"}), 400
+
+        cursor.execute("""
+            UPDATE users SET
+                name = ?,
+                email = ?,
+                phone = ?,
+                address = ?
+            WHERE id = ?
+        """, (
+            data['name'],
+            data['email'],
+            data['phone'],
+            data['address'],
+            user_id
+        ))
+
+        conn.commit()
+
+        # Get updated user data
+        cursor.execute("""
+            SELECT u.name, u.email, u.phone, u.address,
+                   a.account_number, a.account_type
+            FROM users u
+            LEFT JOIN accounts a ON u.id = a.user_id
+            WHERE u.id = ?
+        """, (user_id,))
+        updated_user = cursor.fetchone()
+
+        conn.close()
+
+        return jsonify({
+            "message": "Profile updated successfully",
+            "user": {
+                "name": updated_user["name"],
+                "email": updated_user["email"],
+                "phone": updated_user["phone"],
+                "address": updated_user["address"],
+                "accountNumber": updated_user["account_number"],
+                "accountType": updated_user["account_type"]
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"Error updating profile: {str(e)}")
+        return jsonify({"error": "Failed to update profile"}), 500
+
+@app.route('/api/profile/password', methods=['PUT'])
+@jwt_required()
+def update_user_password():
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+
+        if not data.get('currentPassword') or not data.get('newPassword'):
+            return jsonify({"error": "Missing password fields"}), 400
+
+        if len(data['newPassword']) < 6:
+            return jsonify({"error": "Password must be at least 6 characters"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Get current password hash
+        cursor.execute("SELECT password FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+
+        if not user or not bcrypt.checkpw(data['currentPassword'].encode('utf-8'), user['password']):
+            conn.close()
+            return jsonify({"error": "Invalid current password"}), 401
+
+        # Hash new password
+        new_password_hash = bcrypt.hashpw(data['newPassword'].encode('utf-8'), bcrypt.gensalt())
+
+        cursor.execute("""
+            UPDATE users SET
+                password = ?
+            WHERE id = ?
+        """, (new_password_hash, user_id))
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "Password updated successfully"}), 200
+
+    except Exception as e:
+        print(f"Error updating password: {str(e)}")
+        return jsonify({"error": "Failed to update password"}), 500
 
 if __name__ == "__main__":
     if not os.path.exists('banking.db'):
