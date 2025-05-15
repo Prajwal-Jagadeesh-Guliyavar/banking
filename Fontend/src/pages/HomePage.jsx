@@ -24,12 +24,12 @@ const HomePage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link to="/register">
-                  <Button size="lg" className="bg-white text-bank-primary hover:bg-gray-100">
+                  <Button size="lg" variant="outline" className="bg-white border-white text-bank-primary hover:bg-white/10 hover:text-white">
                     OPEN AN ACCOUNT
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button size="lg" variant="outline" className="border-white text-bank-primary hover:bg-white/10">
+                  <Button size="lg" variant="outline" className="border-white text-bank-primary hover:bg-white/10 hover:text-white">
                     LOGIN
                   </Button>
                 </Link>
@@ -243,12 +243,12 @@ const HomePage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/register">
-              <Button size="lg" className="bg-white text-bank-primary hover:bg-gray-100">
+              <Button size="lg" variant="outline" className="bg-white border-white text-bank-primary hover:bg-white/10 hover:text-white">
                 OPEN AN ACCOUNT TODAY
               </Button>
             </Link>
             <Link to="/contact">
-              <Button size="lg" variant="outline" className="border-white text-bank-primary hover:bg-white/10">
+              <Button size="lg" variant="outline" className="border-white text-bank-primary hover:bg-white/10 hover:text-white">
                 CONTACT US
               </Button>
             </Link>

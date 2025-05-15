@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Menu, X, Home, User, CreditCard,
-  PiggyBank, FileText, LogOut, LogIn
+  PiggyBank, FileText, LogOut, LogIn, HandCoins
 } from 'lucide-react';
 
 const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
@@ -46,8 +46,8 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-              <div className="h-8 w-8 bg-bank-primary rounded-md flex items-center justify-center">
-                <PiggyBank size={20} className="text-white" />
+              <div className="h-10 w-10 bg-bank-primary rounded-md flex items-center justify-center">
+                <HandCoins size={30} className="text-white" />
               </div>
               <span className="text-xl font-bold text-bank-primary">BankIt</span>
             </Link>
