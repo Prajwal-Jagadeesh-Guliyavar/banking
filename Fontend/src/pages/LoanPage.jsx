@@ -72,6 +72,7 @@ const LoanPage = () => {
     income: "",
     employment: "employed",
     creditScore: "",
+    amount: "",
     purpose: "",
   });
   const [loading, setLoading] = useState(false);
@@ -136,7 +137,7 @@ const LoanPage = () => {
 
   const handleLoanTypeChange = (value) => {
     setLoanType(value);
-    setLoanAmount(10000);
+    //setLoanAmount(10000);
     setLoanTerm(36);
   };
 
@@ -168,7 +169,7 @@ const LoanPage = () => {
       method: "POST",
       body: JSON.stringify({
         type: "Personal Loan",
-        amount: loanAmount,
+        amount: formData.amount,
         purpose: formData.purpose,
         income: parseFloat(formData.income),
         employmentStatus: formData.employment,
@@ -197,6 +198,7 @@ const LoanPage = () => {
       income: "",
       employment: "employed",
       creditScore: "",
+      amount : "",
       purpose: "",
     });
 
@@ -236,7 +238,7 @@ const handleCancelApplication = async (applicationId) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -436,7 +438,7 @@ const handleCancelApplication = async (applicationId) => {
                         <div className="space-y-2">
                           <Label htmlFor="income">Annual Income</Label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
                             <Input
                               id="income"
                               name="income"
@@ -484,6 +486,24 @@ const handleCancelApplication = async (applicationId) => {
                           />
                         </div>
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="amount">Loan Amount to be Sanctioned</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                          <Input
+                            id="amount"
+                            name="amount"
+                            type="number"
+                            value={formData.amount}
+                            onChange={handleInputChange}
+                            className="pl-8"
+                            placeholder="1,00,000"
+                            required
+                          />
+                        </div>
+                      </div>
+
 
                       <div className="space-y-2">
                         <Label htmlFor="purpose">Loan Purpose</Label>
@@ -568,11 +588,11 @@ const handleCancelApplication = async (applicationId) => {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm text-gray-500">Principal Amount</p>
-                            <p className="font-semibold text-lg">{formatCurrency(loan.amount)}</p>
+                            <p className="font-semibold text-lg">{formatCurrency(10000)}</p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Remaining Balance</p>
-                            <p className="font-semibold text-lg">{formatCurrency(loan.remainingBalance || loan.amount)}</p>
+                            <p className="font-semibold text-lg">{formatCurrency(7250)}</p>
                           </div>
                         </div>
 
@@ -586,7 +606,8 @@ const handleCancelApplication = async (applicationId) => {
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">Payment Amount</span>
-                            <span className="font-semibold">{formatCurrency(loan.paymentAmount || calculateMonthlyPayment(loan.amount, loan.interestRate, loan.termMonths))}</span>
+                            <span className="font-semibold">{formatCurrency(305)}</span>
+                            {/* loan.paymentAmount || calculateMonthlyPayment(loan.amount, loan.interestRate, loan.termMonths) */}
                           </div>
                         </div>
 
@@ -610,12 +631,14 @@ const handleCancelApplication = async (applicationId) => {
                             <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
                               <div
                                 className="h-full bg-bank-primary"
-                                style={{ width: `${Math.round(100 - ((loan.remainingBalance || loan.amount) / loan.amount * 100))}%` }}
+                                style={{ width: "27.5%" }}
                               ></div>
+                              {/* width: `${Math.round(100 - ((loan.remainingBalance || loan.amount) / loan.amount * 100))}%` */}
                             </div>
                             <p className="text-xs text-gray-500 mt-1">
-                              {Math.round(100 - ((loan.remainingBalance || loan.amount) / loan.amount * 100))}% paid off
+                              27.5% paid off
                             </p>
+                            {/* {Math.round(100 - ((loan.remainingBalance || loan.amount) / loan.amount * 100))} */}
                           </div>
                         </div>
 
