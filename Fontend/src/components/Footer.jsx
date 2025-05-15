@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10"> {/* Increased gap */}
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-semibold mb-4 text-white">BankHive</h3> {/* Brighter heading */}
+            <h3 className="text-xl font-semibold mb-4 text-white">BankIt</h3> {/* Brighter heading */}
             <p className="mb-4 text-brand-gray"> {/* Muted text */}
               Providing secure and innovative banking solutions. Your trusted partner for all financial needs.
             </p>
@@ -59,15 +59,15 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-start space-x-3"> {/* Use items-start for better alignment if text wraps */}
                 <MapPin size={18} className="text-brand-orange mt-1 flex-shrink-0" /> {/* Icon color and alignment */}
-                <span className="text-brand-gray">123 Banking Street, Finance City, FC 12345</span>
+                <span className="text-brand-gray">St Lazaurus Larnaca, Cyprus 6010-6060</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone size={18} className="text-brand-orange flex-shrink-0" />
-                <span className="text-brand-gray">(123) 456-7890</span>
+                <span className="text-brand-gray">7894561230</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail size={18} className="text-brand-orange flex-shrink-0" />
-                <span className="text-brand-gray">contact@bankhive.com</span>
+                <span className="text-brand-gray">contact@bankit.com</span>
               </div>
             </div>
           </div>

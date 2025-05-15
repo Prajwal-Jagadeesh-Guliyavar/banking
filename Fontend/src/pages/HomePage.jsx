@@ -23,12 +23,12 @@ const HomePage = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link to="/register">
                   <Button size="lg" className="bg-white text-bank-primary hover:bg-gray-100">
-                    Open an Account
+                    OPEN AN ACCOUNT
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                    Login
+                  <Button size="lg" variant="outline" className="border-white text-bank-primary hover:bg-white/10">
+                    LOGIN
                   </Button>
                 </Link>
               </div>
@@ -50,17 +50,31 @@ const HomePage = () => {
 
                     <div>
                       <p className="text-white/70 text-sm mb-1">Current Balance</p>
-                      <p className="text-white font-bold text-3xl">$12,750.00</p>
+                      <p className="text-white font-bold text-3xl">$10,750.00</p>
                       <div className="flex items-center space-x-1 mt-1">
                         <TrendingUp size={16} className="text-green-400" />
                         <span className="text-green-400 text-sm">+2.4% this month</span>
                       </div>
                     </div>
 
-                    <div className="mt-4">
-                      <div className="bg-white/20 h-12 w-64 rounded-lg"></div>
+                    <div className="mt-4 space-y-3">
+                      {/* Rewards Progress */}
+                      <div>
+                        <p className="text-white/70 text-sm mb-1">Rewards Progress</p>
+                        <div className="w-64 bg-white/20 rounded-lg h-3 overflow-hidden">
+                          <div className="bg-yellow-400 h-3 w-2/3 rounded-lg"></div>
+                        </div>
+                        <p className="text-white/60 text-xs mt-1">Earn 340 more points to reach Gold+ Tier</p>
+                      </div>
+
+                      {/* Upcoming Statement */}
+                      <div>
+                        <p className="text-white/70 text-sm mb-1">Next Statement</p>
+                        <p className="text-white font-medium text-sm">June 30, 2025</p>
+                      </div>
                     </div>
                   </div>
+
                 </div>
                 <div className="absolute -bottom-6 right-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl"></div>
                 <div className="absolute top-10 -left-6 w-24 h-24 bg-blue-400/20 rounded-full blur-xl"></div>
@@ -198,7 +212,13 @@ const HomePage = () => {
                 </div>
                 <p className="text-gray-700 mb-6 italic">{testimonial.quote}</p>
                 <div className="flex items-center">
-                  <div className="bg-gray-300 rounded-full w-10 h-10 mr-3"></div>
+                  <div className="bg-gray-300 rounded-full w-10 h-10 mr-3 overflow-hidden flex items-center justify-center">
+                    <img
+                      src="/default.jpg"
+                      alt="Avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </div>
                   <div>
                     <p className="font-semibold text-gray-800">{testimonial.name}</p>
                     <p className="text-gray-500 text-sm">{testimonial.title}</p>
@@ -220,12 +240,12 @@ const HomePage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/register">
               <Button size="lg" className="bg-white text-bank-primary hover:bg-gray-100">
-                Open an Account Today
+                OPEN AN ACCOUNT TODAY
               </Button>
             </Link>
             <Link to="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                Contact Us
+              <Button size="lg" variant="outline" className="border-white text-bank-primary hover:bg-white/10">
+                CONTACT US
               </Button>
             </Link>
           </div>
