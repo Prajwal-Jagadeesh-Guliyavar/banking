@@ -197,7 +197,7 @@ const ProfilePage = () => {
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center">
                 <Avatar className="h-24 w-24 mb-4">
-                  <AvatarImage src="" alt={userData.name} />
+                  <AvatarImage src="/default.jpg" alt={userData.name} />
                   <AvatarFallback className="bg-bank-primary text-white text-xl">
                     {userData.name.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
