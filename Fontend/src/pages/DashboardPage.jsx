@@ -225,14 +225,14 @@ const DashboardPage = () => {
                         axisLine={{ stroke: '#f0f0f0' }}
                       />
                       <YAxis
-                        tickFormatter={(value) => `$${value}`}
+                        tickFormatter={(value) => `₹${value}`}
                         tick={{ fontSize: 12 }}
                         tickLine={false}
                         axisLine={false}
                         domain={['dataMin - 500', 'dataMax + 500']}
                       />
                       <Tooltip
-                        formatter={(value) => [`$${value.toFixed(2)}`, 'Balance']}
+                        formatter={(value) => [`₹${value.toFixed(2)}`, 'Balance']}
                         labelFormatter={(value) => `Date: ${value}`}
                         contentStyle={{
                           backgroundColor: 'white',
@@ -302,7 +302,7 @@ const DashboardPage = () => {
                         <p className="text-xs text-gray-500">Due in 5 days</p>
                       </div>
                     </div>
-                    <p className="font-medium">$1,200</p>
+                    <p className="font-medium">₹1,200</p>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
@@ -314,7 +314,7 @@ const DashboardPage = () => {
                         <p className="text-xs text-gray-500">Due in 10 days</p>
                       </div>
                     </div>
-                    <p className="font-medium">$85</p>
+                    <p className="font-medium">₹85</p>
                   </div>
                 </div>
                 <div className="mt-4">
@@ -392,7 +392,7 @@ const DashboardPage = () => {
                     </div>
                     <span>Shopping</span>
                   </div>
-                  <span className="font-medium">$345.00</span>
+                  <span className="font-medium">₹345.00</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
@@ -401,7 +401,7 @@ const DashboardPage = () => {
                     </div>
                     <span>Groceries</span>
                   </div>
-                  <span className="font-medium">$265.50</span>
+                  <span className="font-medium">₹265.50</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
@@ -410,7 +410,7 @@ const DashboardPage = () => {
                     </div>
                     <span>Entertainment</span>
                   </div>
-                  <span className="font-medium">$199.00</span>
+                  <span className="font-medium">₹199.00</span>
                 </div>
               </div>
               <div className="mt-6">
@@ -435,11 +435,11 @@ const DashboardPage = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Principal</span>
-                      <span>$10,000.00</span>
+                      <span>₹10,000.00</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Remaining</span>
-                      <span>$7,250.00</span>
+                      <span>₹7,250.00</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Next payment</span>
@@ -463,7 +463,7 @@ const DashboardPage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <p className="font-medium">Vacation Fund</p>
-                    <span className="text-sm font-medium">$1,250 / $3,000</span>
+                    <span className="text-sm font-medium">₹1,250 / ₹3,000</span>
                   </div>
                   <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div className="h-full bg-bank-primary" style={{ width: "42%" }}></div>
@@ -474,7 +474,7 @@ const DashboardPage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <p className="font-medium">Emergency Fund</p>
-                    <span className="text-sm font-medium">$5,000 / $10,000</span>
+                    <span className="text-sm font-medium">₹5,000 / ₹10,000</span>
                   </div>
                   <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div className="h-full bg-bank-primary" style={{ width: "50%" }}></div>
