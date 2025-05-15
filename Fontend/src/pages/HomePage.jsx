@@ -5,6 +5,8 @@ import {
   Shield, Users, TrendingUp, CreditCard,
   Smartphone, Globe, CheckCircle2, Award
 } from "lucide-react";
+import React from 'react';
+import GoldPriceChart from '../components/GoldPriceChart';
 
 const HomePage = () => {
   return (
@@ -35,51 +37,53 @@ const HomePage = () => {
             </div>
             <div className="md:w-1/2 mt-10 md:mt-0">
               <div className="relative">
-                <div className="w-full h-72 md:h-96 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
-                  <div className="p-6 relative h-full flex flex-col justify-between">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-white/70 text-sm">Premium Account</p>
-                        <p className="text-white font-bold text-xl">BankHive Gold</p>
+                {/* Gold Price Card */}
+                <div className="w-full h-auto bg-white/10 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden relative z-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+                  <div className="p-6 relative">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center justify-center h-full">
+                        <h2 className="text-xl md:text-2xl font-semibold text-white text-center">
+                           10g of 24k <span className="text-yellow-300 font-bold">GOLD</span> in Bengaluru is
+                        </h2>
                       </div>
-                      <div className="h-10 w-10 rounded-full bg-yellow-400 flex items-center justify-center">
-                        <CheckCircle2 className="text-bank-primary" size={20} />
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-2xl md:text-4xl font-bold text-green-400 mt-3">
+                          ₹95,520.00 <span className="text-sm text-gray-300 mt-0">Indian Rupee</span>
+                        </p>
+                        <p className="text-sm text-white">
+                          Friday, May 16, 2025, 12:12 AM IST
+                        </p>
                       </div>
+                      {/* Optional: Dropdown */}
+                      {/* <select className="bg-gray-700 text-white p-2 rounded">
+                        <option>Bengaluru</option>
+                      </select> */}
                     </div>
-
-                    <div>
-                      <p className="text-white/70 text-sm mb-1">Current Balance</p>
-                      <p className="text-white font-bold text-3xl">$10,750.00</p>
-                      <div className="flex items-center space-x-1 mt-1">
-                        <TrendingUp size={16} className="text-green-400" />
-                        <span className="text-green-400 text-sm">+2.4% this month</span>
-                      </div>
+                    {/* Timeframe Buttons */}
+                    <div className="flex space-x-2 mb-4">
+                      {['5D', '1M', '1Y', 'Max'].map((period) => (
+                        <button
+                          key={period}
+                          className={`px-3 py-1 rounded text-sm transition ${
+                            period === '1M'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-blue-450 text-white hover:bg-gray-600'
+                          }`}
+                        >
+                          {period}
+                        </button>
+                      ))}
                     </div>
-
-                    <div className="mt-4 space-y-3">
-                      {/* Rewards Progress */}
-                      <div>
-                        <p className="text-white/70 text-sm mb-1">Rewards Progress</p>
-                        <div className="w-64 bg-white/20 rounded-lg h-3 overflow-hidden">
-                          <div className="bg-yellow-400 h-3 w-2/3 rounded-lg"></div>
-                        </div>
-                        <p className="text-white/60 text-xs mt-1">Earn 340 more points to reach Gold+ Tier</p>
-                      </div>
-
-                      {/* Upcoming Statement */}
-                      <div>
-                        <p className="text-white/70 text-sm mb-1">Next Statement</p>
-                        <p className="text-white font-medium text-sm">June 30, 2025</p>
-                      </div>
-                    </div>
+                    <GoldPriceChart />
                   </div>
-
                 </div>
+                {/* Decorative Blurs */}
                 <div className="absolute -bottom-6 right-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl"></div>
                 <div className="absolute top-10 -left-6 w-24 h-24 bg-blue-400/20 rounded-full blur-xl"></div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
