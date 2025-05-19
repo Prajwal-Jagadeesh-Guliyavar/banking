@@ -77,7 +77,7 @@ banking/
    ```
    flask run
    ```
-   
+
    The backend will be available at http://localhost:5000
 
 ### Frontend Setup
@@ -95,7 +95,7 @@ banking/
    ```
    npm run dev
    ```
-   
+
    The frontend will be available at http://localhost:8080
 
 ## Backend API Documentation
@@ -140,6 +140,4 @@ The SQLite database (`banking.db`) includes the following tables:
 - **update_balance**: Updates account balances after transactions
 - **audit_trail**: Maintains an audit log of important changes
 
-## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
