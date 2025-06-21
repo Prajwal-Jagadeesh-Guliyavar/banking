@@ -1,6 +1,5 @@
 
-# BankIt - Full Stack Banking Application
-
+# BankIt - Full Stack Banking Simulation
 BankIt is a comprehensive banking web application with a React frontend and a Flask backend. This application provides user authentication, account management, transactions, loan applications, and more.
 
 ## Features
@@ -53,8 +52,8 @@ banking/
 ### Backend Setup
 1. Clone the repository:
    ```
-   git clone https://github.com/Prajwal-Jagadeesh-Guliyavar/banking.git
-   cd banking/backend
+   git clone https://github.com/Prajwal-Jagadeesh-Guliyavar/banking-simulation.git
+   cd banking-simulation/backend
    ```
 
 2. Create and activate a virtual environment:
